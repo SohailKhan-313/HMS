@@ -2,47 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreExpenseCategoryRequest;
+use App\Http\Requests\UpdateExpenseCategoryRequest;
 use App\Models\ExpenseCatagory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ExpenseCatagoryController extends Controller
 {
-  public function index()
-{
-    // 10 items per page (adjust as needed)
-    $categories = ExpenseCatagory::latest()->paginate(10);
-
-    return view('expenses.expense-catagory', compact('categories'));
-}
-
-    public function store(Request $request)
+    /**
+     * Display a listing of expense categories.
+     */
+    public function index(): View
     {
-        $request->validate([
-            'name'=>'required',
-            'description'=>'required'
-        ]);
+        $categories = ExpenseCatagory::query()->latest()->paginate(10);
 
-        ExpenseCatagory::create($request->all());
-
-        return redirect()->back()->with('success','Category Added');
+        return view('expenses.expense-catagory', compact('categories'));
     }
 
-    public function update(Request $request,$id)
+    /**
+     * Store a newly created category.
+     */
+    public function store(StoreExpenseCategoryRequest $request): RedirectResponse
+    {
+        ExpenseCatagory::create($request->validated());
+
+        return redirect()->route('category.index')->with('success', 'Category added successfully.');
+    }
+
+    /**
+     * Show edit form or return JSON for modal.
+     */
+    public function edit(int|string $id): JsonResponse|RedirectResponse
     {
         $category = ExpenseCatagory::findOrFail($id);
 
-        $category->update([
-            'name'=>$request->name,
-            'description'=>$request->description
-        ]);
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json($category);
+        }
 
-        return redirect()->back()->with('success','Category Updated');
+        return redirect()->route('category.index');
     }
 
-    public function destroy($id)
+    /**
+     * Update the specified category.
+     */
+    public function update(UpdateExpenseCategoryRequest $request, int|string $id): RedirectResponse
     {
-        ExpenseCatagory::findOrFail($id)->delete();
+        $category = ExpenseCatagory::findOrFail($id);
+        $category->update($request->validated());
 
-        return redirect()->back()->with('success','Category Deleted');
+        return redirect()->route('category.index')->with('success', 'Category updated successfully.');
+    }
+
+    /**
+     * Remove the specified category.
+     */
+    public function destroy(int|string $id): RedirectResponse
+    {
+        $category = ExpenseCatagory::findOrFail($id);
+        $category->delete();
+
+        return redirect()->route('category.index')->with('success', 'Category deleted successfully.');
     }
 }

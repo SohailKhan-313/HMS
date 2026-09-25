@@ -24,7 +24,7 @@ return new class extends Migration
     {
         Schema::table('doctors', function (Blueprint $table) {
             //
-              $table->dropColumn('duty_schedule');
+            $table->dropColumn('duty_schedule');
         });
     }
 };

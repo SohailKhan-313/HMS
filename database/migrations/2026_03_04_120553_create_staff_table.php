@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email');
             $table->string('phone');
             $table->string('designation');
-            $table->decimal('salary',10,2)->nullable();
+            $table->decimal('salary', 10, 2)->nullable();
             $table->string('image')->nullable();
             $table->timestamps();
         });

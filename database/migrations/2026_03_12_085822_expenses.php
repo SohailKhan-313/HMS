@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         //
-        Schema::create('expenses',function (Blueprint $table){
+        Schema::create('expenses', function (Blueprint $table) {
             $table->id();
             $table->date('date');
             $table->string('name');
@@ -21,12 +21,13 @@ return new class extends Migration
             $table->timestamps();
         });
     }
+
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
         //
-         Schema::dropIfExists('expenses');
+        Schema::dropIfExists('expenses');
     }
 };

@@ -9,8 +9,8 @@
                 <div class="d-flex align-items-center">
                     <div>
                         <p class="mb-0 text-secondary">Total Patients</p>
-                        <h4 class="my-1">1,245</h4>
-                        <p class="mb-0 font-13 text-success"><i class="bi bi-caret-up-fill"></i> 12 new this week</p>
+                        <h4 class="my-1">{{ number_format($totalPatients ?? 0) }}</h4>
+                        <p class="mb-0 font-13 text-success"><i class="bi bi-people-fill"></i> Registered Patients</p>
                     </div>
                     <div class="widget-icon-large bg-gradient-purple text-white ms-auto"><i class="bi bi-people-fill"></i>
                     </div>
@@ -23,9 +23,9 @@
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div>
-                        <p class="mb-0 text-secondary">Available Beds</p>
-                        <h4 class="my-1">45</h4>
-                        <p class="mb-0 font-13 text-warning"><i class="bi bi-caret-down-fill"></i> 156 Total Capacity</p>
+                        <p class="mb-0 text-secondary">Hospital Staff</p>
+                        <h4 class="my-1">{{ number_format($totalStaff ?? 0) }}</h4>
+                        <p class="mb-0 font-13 text-warning"><i class="bi bi-person-lines-fill"></i> Active Staff</p>
                     </div>
                     <div class="widget-icon-large bg-gradient-success text-white ms-auto"><i class="bi bi-hospital"></i>
                     </div>
@@ -39,8 +39,8 @@
                 <div class="d-flex align-items-center">
                     <div>
                         <p class="mb-0 text-secondary">Doctors On Duty</p>
-                        <h4 class="my-1">28</h4>
-                        <p class="mb-0 font-13 text-success"><i class="bi bi-caret-up-fill"></i> 5 departments</p>
+                        <h4 class="my-1">{{ number_format($totalDoctors ?? 0) }}</h4>
+                        <p class="mb-0 font-13 text-success"><i class="bi bi-check-circle"></i> Medical Specialists</p>
                     </div>
                     <div class="widget-icon-large bg-gradient-danger text-white ms-auto"><i class="bi bi-person-badge-fill"></i>
                     </div>
@@ -54,8 +54,8 @@
                 <div class="d-flex align-items-center">
                     <div>
                         <p class="mb-0 text-secondary">Today's Appointments</p>
-                        <h4 class="my-1">38</h4>
-                        <p class="mb-0 font-13 text-info"><i class="bi bi-clock"></i> 12 pending</p>
+                        <h4 class="my-1">{{ number_format($todayAppointments ?? 0) }}</h4>
+                        <p class="mb-0 font-13 text-info"><i class="bi bi-clock"></i> {{ $pendingAppointments ?? 0 }} pending</p>
                     </div>
                     <div class="widget-icon-large bg-gradient-info text-white ms-auto"><i class="bi bi-calendar-check-fill"></i>
                     </div>

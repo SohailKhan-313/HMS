@@ -2,146 +2,134 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
+use App\Http\Requests\StoreStaffRequest;
+use App\Http\Requests\UpdateStaffRequest;
 use App\Models\Staff;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class StaffController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of staff.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Staff::query();
 
-        if ($request->has('search') && $request->search != '') {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%')
-                ->orWhere('phone', 'like', '%' . $request->search . '%')
-                ->orWhere('designation', 'like', '%' . $request->search . '%');
+        if ($request->filled('search')) {
+            $search = (string) $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('designation', 'like', "%{$search}%");
+            });
         }
 
-        $staff = $query->paginate(2);
+        $staff = $query->latest()->paginate(10)->withQueryString();
 
         return view('staff.staff', compact('staff'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new staff member (modal on index).
      */
-    public function create()
+    public function create(): RedirectResponse
     {
-        //
+        return redirect()->route('staff.index');
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created staff member in storage.
      */
-public function store(Request $request)
-{
-    // 1️⃣ Validate request
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:staff,email',
-        'phone' => 'required|string|max:20',
-        'designation' => 'nullable|string|max:100',
-        'salary' => 'nullable|numeric',
-        'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-    ]);
-
-    // 2️⃣ Extract fields
-    $data = $request->only(['name', 'email', 'phone', 'designation', 'salary']);
-
-    // 3️⃣ Set default values for nullable fields
-    $data['designation'] = $data['designation'] ?? 'Not Assigned';
-    $data['salary'] = $data['salary'] ?? 0;
-
-    // 4️⃣ Handle image upload safely
-    if ($request->hasFile('image')) {
-        try {
-            $data['image'] = $request->file('image')->store('staff', 'public');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Image upload failed: ' . $e->getMessage());
-        }
-    }
-
-    // 5️⃣ Insert into database with error handling
-    try {
-        $staff = Staff::create($data);
-
-        if (!$staff) {
-            return redirect()->back()->with('error', 'Staff record could not be inserted. Check table name and primary key.');
-        }
-    } catch (\Illuminate\Database\QueryException $e) {
-        return redirect()->back()->with('error', 'Database error: ' . $e->getMessage());
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Unexpected error: ' . $e->getMessage());
-    }
-
-    // 6️⃣ Success
-    return redirect()->back()->with('success', 'Staff added successfully!');
-}
-
-    public function show(string $id)
+    public function store(StoreStaffRequest $request): RedirectResponse
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $staff = Staff::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required',
-            'designation' => 'required',
-            'email' => 'required|email',
-            'phone' => 'required',
-            'salary' => 'required',
-            'image' => 'nullable|image'
-        ]);
+        $data = $request->validated();
+        $data['designation'] = $data['designation'] ?? 'Not Assigned';
+        $data['salary'] = $data['salary'] ?? 0;
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('staff', 'public');
-            $staff->image = $imagePath;
+            $data['image'] = $request->file('image')->store('staff', 'public');
         }
 
-        $staff->name = $request->name;
-        $staff->designation = $request->designation;
-        $staff->email = $request->email;
-        $staff->phone = $request->phone;
-        $staff->salary = $request->salary;
+        Staff::create($data);
 
-        $staff->save();
-
-        return redirect()->back()->with('update', 'Staff Updated Successfully');
+        return redirect()->route('staff.index')->with('success', 'Staff added successfully!');
     }
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function delete($id)
-    {
-        $staff = Staff::findOrFail($id);
 
-        if ($staff->image) {
-            Storage::disk('public')->delete($staff->image);
+    /**
+     * Display the specified staff member.
+     */
+    public function show(int|string $id): JsonResponse|RedirectResponse
+    {
+        $staffMember = Staff::findOrFail($id);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json($staffMember);
         }
 
-        $staff->delete();
+        return redirect()->route('staff.index');
+    }
 
-        return redirect()->back()->with('delete', 'Staff Deleted Successfully');
+    /**
+     * Show the form for editing the specified staff member.
+     */
+    public function edit(int|string $id): JsonResponse|RedirectResponse
+    {
+        $staffMember = Staff::findOrFail($id);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json($staffMember);
+        }
+
+        return redirect()->route('staff.index');
+    }
+
+    /**
+     * Update the specified staff member in storage.
+     */
+    public function update(UpdateStaffRequest $request, int|string $id): RedirectResponse
+    {
+        $staffMember = Staff::findOrFail($id);
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            if ($staffMember->image) {
+                Storage::disk('public')->delete($staffMember->image);
+            }
+            $data['image'] = $request->file('image')->store('staff', 'public');
+        }
+
+        $staffMember->update($data);
+
+        return redirect()->route('staff.index')->with('update', 'Staff updated successfully!');
+    }
+
+    /**
+     * Remove the specified staff member from storage.
+     */
+    public function destroy(int|string $id): RedirectResponse
+    {
+        $staffMember = Staff::findOrFail($id);
+
+        if ($staffMember->image) {
+            Storage::disk('public')->delete($staffMember->image);
+        }
+
+        $staffMember->delete();
+
+        return redirect()->route('staff.index')->with('delete', 'Staff deleted successfully.');
+    }
+
+    /**
+     * Backward-compatible alias for delete route.
+     */
+    public function delete(int|string $id): RedirectResponse
+    {
+        return $this->destroy($id);
     }
 }

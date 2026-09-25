@@ -1,0 +1,205 @@
+<?php
+
+use App\Models\Appointment;
+use App\Models\Doctor;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+test('dashboard page renders successfully', function () {
+    $response = $this->get(route('welcome'));
+
+    $response->assertOk();
+    $response->assertViewIs('welcome');
+});
+
+test('staff page renders successfully', function () {
+    $response = $this->get(route('staff.index'));
+
+    $response->assertOk();
+    $response->assertViewIs('staff.staff');
+});
+
+test('appointments page renders successfully', function () {
+    $response = $this->get(route('appointment.index'));
+
+    $response->assertOk();
+    $response->assertViewIs('appointments.appointment');
+});
+
+test('doctors page renders successfully', function () {
+    $response = $this->get(route('doctors.index'));
+
+    $response->assertOk();
+    $response->assertViewIs('doctors.doctors');
+});
+
+test('expenses page renders successfully', function () {
+    $response = $this->get(route('expenses.index'));
+
+    $response->assertOk();
+    $response->assertViewIs('expenses.expanse');
+});
+
+test('expense categories page renders successfully', function () {
+    $response = $this->get(route('category.index'));
+
+    $response->assertOk();
+    $response->assertViewIs('expenses.expense-catagory');
+});
+
+test('patients page renders successfully', function () {
+    $response = $this->get(route('patients.index'));
+
+    $response->assertOk();
+    $response->assertViewIs('history.p-history');
+});
+
+test('hospital payments page renders successfully', function () {
+    $response = $this->get(route('hospital-payments'));
+
+    $response->assertOk();
+    $response->assertViewIs('hospital-payments');
+});
+
+test('can create a doctor via store route', function () {
+    $doctorData = [
+        'name' => 'Dr. Ahmed Khan',
+        'email' => 'ahmed.khan@hospital.test',
+        'phone' => '+92 300 1234567',
+        'speciality' => 'Cardiologist',
+        'pmdc' => 'PMC-12345-P',
+        'fee' => 2500.00,
+        'duty_days' => ['Monday', 'Wednesday', 'Friday'],
+        'duty_time' => [
+            'Monday' => ['start' => '09:00', 'end' => '14:00'],
+            'Wednesday' => ['start' => '09:00', 'end' => '14:00'],
+            'Friday' => ['start' => '09:00', 'end' => '13:00'],
+        ],
+    ];
+
+    $response = $this->post(route('doctors.store'), $doctorData);
+
+    $response->assertRedirect(route('doctors.index'));
+    $this->assertDatabaseHas('doctors', [
+        'name' => 'Dr. Ahmed Khan',
+        'email' => 'ahmed.khan@hospital.test',
+    ]);
+});
+
+test('can create an appointment for a doctor', function () {
+    $doctor = Doctor::create([
+        'name' => 'Dr. Sara Malik',
+        'email' => 'sara@hospital.test',
+        'phone' => '03121234567',
+        'speciality' => 'Neurologist',
+        'pmdc' => 'PMC-54321-N',
+        'fee' => 3000.00,
+    ]);
+
+    $appointmentData = [
+        'doctor_id' => $doctor->id,
+        'name' => 'Usman Ali',
+        'phone' => '03331112233',
+        'gender' => 'Male',
+        'age' => 32,
+        'status' => 'Pending',
+        'time' => '10:30 AM',
+    ];
+
+    $response = $this->post(route('appointment.store'), $appointmentData);
+
+    $response->assertRedirect(route('appointment.index'));
+    $this->assertDatabaseHas('appointments', [
+        'name' => 'Usman Ali',
+        'doctor_id' => $doctor->id,
+    ]);
+});
+
+test('can create staff member', function () {
+    $staffData = [
+        'name' => 'Zubair Shah',
+        'email' => 'zubair@hospital.test',
+        'phone' => '03009988776',
+        'designation' => 'Staff Nurse',
+        'salary' => 45000.00,
+    ];
+
+    $response = $this->post(route('staff.store'), $staffData);
+
+    $response->assertRedirect(route('staff.index'));
+    $this->assertDatabaseHas('staff', [
+        'email' => 'zubair@hospital.test',
+        'name' => 'Zubair Shah',
+    ]);
+});
+
+test('can create expense category and expense', function () {
+    $categoryResponse = $this->post(route('category.store'), [
+        'name' => 'Medical Supplies',
+        'description' => 'Bandages, syringes and surgical consumables',
+    ]);
+
+    $categoryResponse->assertRedirect(route('category.index'));
+    $this->assertDatabaseHas('expense_catagory', [
+        'name' => 'Medical Supplies',
+    ]);
+
+    $expenseResponse = $this->post(route('expenses.store'), [
+        'name' => 'Syringes Box',
+        'date' => '2026-09-25',
+        'catagory' => 'Medical Supplies',
+        'amount' => 1500.00,
+    ]);
+
+    $expenseResponse->assertRedirect(route('expenses.index'));
+    $this->assertDatabaseHas('expenses', [
+        'name' => 'Syringes Box',
+        'amount' => 1500.00,
+    ]);
+});
+
+test('can create patient history', function () {
+    $patientData = [
+        'name' => 'Rashid Mehmood',
+        'age' => 45,
+        'phone' => '03214567890',
+        'cnic' => '35201-1234567-1',
+        'due_amount' => 500.00,
+        'wallet_amount' => 1000.00,
+    ];
+
+    $response = $this->post(route('patients.store'), $patientData);
+
+    $response->assertRedirect(route('patients.index'));
+    $this->assertDatabaseHas('patienthistory', [
+        'name' => 'Rashid Mehmood',
+        'phone' => '03214567890',
+    ]);
+});
+
+test('can generate appointment pdf receipt', function () {
+    $doctor = Doctor::create([
+        'name' => 'Dr. Farhan',
+        'email' => 'farhan@hospital.test',
+        'phone' => '03001122334',
+        'speciality' => 'Dermatologist',
+        'pmdc' => 'PMC-99887-D',
+        'fee' => 2000.00,
+    ]);
+
+    $appointment = Appointment::create([
+        'doctor_id' => $doctor->id,
+        'name' => 'Kamran Khan',
+        'phone' => '03451234567',
+        'gender' => 'Male',
+        'age' => 28,
+        'status' => 'Pending',
+        'time' => '11:00 AM',
+    ]);
+
+    $response = $this->get(route('pdf.appointment', $appointment->id));
+
+    $response->assertOk();
+    expect($response->headers->get('content-type'))->toBe('application/pdf');
+});

@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Staff extends Model
+class Appointment extends Model
 {
     use HasFactory;
 
-    protected $table = 'staff';
+    protected $table = 'appointments';
 
     /**
      * The attributes that are mass assignable.
@@ -17,12 +18,16 @@ class Staff extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'doctor_id',
         'name',
-        'email',
+        'gender',
+        'age',
         'phone',
-        'designation',
-        'salary',
-        'image',
+        'time',
+        'status',
+        'notes',
+        'diagnosis',
+        'medicine_suggestions',
     ];
 
     /**
@@ -33,7 +38,15 @@ class Staff extends Model
     protected function casts(): array
     {
         return [
-            'salary' => 'decimal:2',
+            'age' => 'integer',
         ];
+    }
+
+    /**
+     * Get the doctor associated with the appointment.
+     */
+    public function doctor(): BelongsTo
+    {
+        return $this->belongsTo(Doctor::class, 'doctor_id');
     }
 }

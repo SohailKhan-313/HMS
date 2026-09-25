@@ -341,14 +341,6 @@
             </div>
         </div>
     </div>
-
-  
-            <!-- Subtle footer -->
-            <div class="d-flex gap-3 mt-3" style="color:#7589a2; font-size:0.85rem;">
-                <i class="bi bi-info-circle"></i> 0 records · Use "Add Expense" to create an entry
-            </div>
-        </div>
-    </div>
 </div>
 </main>
 @endsection

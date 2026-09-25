@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
 
   <!-- loader-->
-	<link href="{{asset('/css/pace.min.css" rel="stylesheet')}}" />
+  <link href="{{ asset('/css/pace.min.css') }}" rel="stylesheet" />
 
   <!--Theme Styles-->
   <link href="{{asset('/css/dark-theme.css')}}" rel="stylesheet" />

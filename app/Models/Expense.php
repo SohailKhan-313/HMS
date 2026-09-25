@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Staff extends Model
+class Expense extends Model
 {
     use HasFactory;
 
-    protected $table = 'staff';
+    protected $table = 'expenses';
 
     /**
      * The attributes that are mass assignable.
@@ -18,11 +18,9 @@ class Staff extends Model
      */
     protected $fillable = [
         'name',
-        'email',
-        'phone',
-        'designation',
-        'salary',
-        'image',
+        'date',
+        'catagory',
+        'amount',
     ];
 
     /**
@@ -33,7 +31,8 @@ class Staff extends Model
     protected function casts(): array
     {
         return [
-            'salary' => 'decimal:2',
+            'date' => 'date',
+            'amount' => 'decimal:2',
         ];
     }
 }

@@ -2,56 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreExpenseRequest;
+use App\Http\Requests\UpdateExpenseRequest;
 use App\Models\Expense;
-use Illuminate\Http\Request;
+use App\Models\ExpenseCatagory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ExpenseController extends Controller
 {
+    /**
+     * Display a listing of expenses.
+     */
+    public function index(): View
+    {
+        $categories = ExpenseCatagory::query()->orderBy('name')->get();
+        $expenses = Expense::query()->latest()->get();
 
-public function index()
-{
-    $categories = \App\Models\ExpenseCatagory::all();
-    $expenses = Expense::latest()->get();
-    return view('expenses.expanse', compact('expenses', 'categories'));
-}
+        return view('expenses.expanse', compact('expenses', 'categories'));
+    }
 
-public function store(Request $request)
-{
-    $request->validate([
-        'date'=>'required',
-        'name'=>'required',
-        'catagory'=>'required',
-        'amount'=>'required'
-    ]);
+    /**
+     * Show create form (modal based).
+     */
+    public function create(): RedirectResponse
+    {
+        return redirect()->route('expenses.index');
+    }
 
-    Expense::create($request->all());
+    /**
+     * Store a newly created expense.
+     */
+    public function store(StoreExpenseRequest $request): RedirectResponse
+    {
+        Expense::create($request->validated());
 
-    return redirect()->back()->with('success','Expense added successfully');
-}
+        return redirect()->route('expenses.index')->with('success', 'Expense added successfully.');
+    }
 
-public function update(Request $request,$id)
-{
-    $request->validate([
-        'date'=>'required',
-        'name'=>'required',
-        'catagory'=>'required',
-        'amount'=>'required'
-    ]);
+    /**
+     * Show edit form or return JSON for modal.
+     */
+    public function edit(int|string $id): JsonResponse|RedirectResponse
+    {
+        $expense = Expense::findOrFail($id);
 
-    $expense = Expense::findOrFail($id);
-    $expense->update($request->all());
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json($expense);
+        }
 
-    return redirect()->route('expenses.index')
-           ->with('success','Updated successfully');
-}
+        return redirect()->route('expenses.index');
+    }
 
-public function destroy($id)
-{
-    $expense = Expense::findOrFail($id);
-    $expense->delete();
+    /**
+     * Update the specified expense.
+     */
+    public function update(UpdateExpenseRequest $request, int|string $id): RedirectResponse
+    {
+        $expense = Expense::findOrFail($id);
+        $expense->update($request->validated());
 
-    return redirect()->back()
-           ->with('success','Deleted successfully');
-}
+        return redirect()->route('expenses.index')->with('success', 'Expense updated successfully.');
+    }
 
+    /**
+     * Remove the specified expense.
+     */
+    public function destroy(int|string $id): RedirectResponse
+    {
+        $expense = Expense::findOrFail($id);
+        $expense->delete();
+
+        return redirect()->route('expenses.index')->with('success', 'Expense deleted successfully.');
+    }
 }

@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Staff extends Model
+class Doctor extends Model
 {
     use HasFactory;
 
-    protected $table = 'staff';
+    protected $table = 'doctors';
 
     /**
      * The attributes that are mass assignable.
@@ -20,9 +21,13 @@ class Staff extends Model
         'name',
         'email',
         'phone',
-        'designation',
-        'salary',
-        'image',
+        'speciality',
+        'pmdc',
+        'fee',
+        'duty_days',
+        'duty_schedule',
+        'duty_start',
+        'duty_end',
     ];
 
     /**
@@ -33,7 +38,15 @@ class Staff extends Model
     protected function casts(): array
     {
         return [
-            'salary' => 'decimal:2',
+            'fee' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Get the appointments associated with the doctor.
+     */
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class, 'doctor_id');
     }
 }

@@ -2,78 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CancelAppointmentsByDateRequest;
+use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentRequest;
 use App\Models\Appointment;
 use App\Models\Doctor;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class AppointmentController extends Controller
 {
     /**
      * Display a listing of appointments.
      */
-public function index(Request $request)
-{
-    $query = Appointment::query();
+    public function index(Request $request): View
+    {
+        $query = Appointment::query()->with('doctor');
 
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%");
-        });
+        if ($request->filled('search')) {
+            $search = (string) $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $appointments = $query->latest()->paginate(10)->withQueryString();
+
+        $today = Carbon::today()->toDateString();
+        $totalToday = Appointment::whereDate('created_at', $today)->count();
+        $pending = Appointment::whereDate('created_at', $today)->where('status', 'Pending')->count();
+        $completed = Appointment::whereDate('created_at', $today)->where('status', 'Completed')->count();
+        $cancelled = Appointment::whereDate('created_at', $today)->where('status', 'Cancelled')->count();
+        $admitted = Appointment::whereDate('created_at', $today)->where('status', 'Admitted')->count();
+
+        $doctors = Doctor::query()->orderBy('name')->get();
+
+        return view('appointments.appointment', compact(
+            'totalToday',
+            'pending',
+            'completed',
+            'cancelled',
+            'admitted',
+            'appointments',
+            'doctors'
+        ));
     }
 
-    $appointments = $query->with('doctor')->latest()->paginate(2); // ✅ paginated
-
-    // Dashboard counts (unaffected by search, as they are "today" stats)
-    $today = Carbon::today()->toDateString();
-    $totalToday = Appointment::whereDate('created_at', $today)->count();
-    $pending = Appointment::whereDate('created_at', $today)->where('status', 'Pending')->count();
-    $completed = Appointment::whereDate('created_at', $today)->where('status', 'Completed')->count();
-    $cancelled = Appointment::whereDate('created_at', $today)->where('status', 'Cancelled')->count();
-    $admitted = Appointment::whereDate('created_at', $today)->where('status', 'Admitted')->count();
-
-    $doctors = Doctor::all();
-
-    return view('appointments.appointment', compact(
-        'totalToday', 'pending', 'completed', 'cancelled', 'admitted',
-        'appointments', 'doctors'
-    ));
-}
     /**
      * Show the form for creating a new appointment.
      */
-    public function create()
+    public function create(): RedirectResponse
     {
-        $doctors = Doctor::all();
-        return view('appointments.create', compact('doctors'));
+        return redirect()->route('appointment.index');
     }
 
     /**
      * Store a newly created appointment.
      */
-    public function store(Request $request)
+    public function store(StoreAppointmentRequest $request): RedirectResponse
     {
-        $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'gender' => 'required|in:Male,Female,Other',
-            'age' => 'required|integer|min:0|max:150',
-            'status' => 'required|string|in:Pending,Completed,Cancelled,Admitted',
-            'time' => 'required'
-        ]);
-
-        Appointment::create([
-            'doctor_id' => $request->doctor_id,
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'gender' => $request->gender,
-            'age' => $request->age,
-            'status' => $request->status,
-             'time' => $request->time,
-        ]);
+        Appointment::create($request->validated());
 
         return redirect()->route('appointment.index')
             ->with('success', 'Appointment created successfully.');
@@ -82,55 +74,47 @@ public function index(Request $request)
     /**
      * Display a specific appointment.
      */
-    public function show($id)
+    public function show(int|string $id): JsonResponse|View
     {
         $appointment = Appointment::with('doctor')->findOrFail($id);
 
-        if (request()->wantsJson()) {
+        if (request()->wantsJson() || request()->ajax()) {
             return response()->json($appointment);
         }
 
-        // Fallback for normal browser request (optional)
-        return view('appointments.show', compact('appointment'));
+        return view('appointments.appointment', [
+            'appointment' => $appointment,
+            'appointments' => Appointment::with('doctor')->latest()->paginate(10),
+            'doctors' => Doctor::all(),
+            'totalToday' => Appointment::whereDate('created_at', Carbon::today()->toDateString())->count(),
+            'pending' => 0,
+            'completed' => 0,
+            'cancelled' => 0,
+            'admitted' => 0,
+        ]);
     }
 
     /**
      * Show the form for editing an appointment.
      */
-    public function edit($id)
+    public function edit(int|string $id): JsonResponse|RedirectResponse
     {
-        $appointment = Appointment::findOrFail($id);
-        $doctors = Doctor::all();
-        return view('appointments.edit', compact('appointment', 'doctors'));
+        $appointment = Appointment::with('doctor')->findOrFail($id);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json($appointment);
+        }
+
+        return redirect()->route('appointment.index');
     }
 
     /**
      * Update an appointment.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateAppointmentRequest $request, int|string $id): RedirectResponse
     {
-        $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'gender' => 'required|in:Male,Female,Other',
-            'age' => 'required|integer|min:0|max:150',
-            'status' => 'required|string|in:Pending,Completed,Cancelled,Admitted',
-            'time' => 'required'
-        ]);
-
         $appointment = Appointment::findOrFail($id);
-
-        $appointment->update([
-            'doctor_id' => $request->doctor_id,
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'gender'=>$request->gender,
-            'age'=>$request->age,
-            'status' => $request->status,
-            'time' => $request->time
-            ,
-        ]);
+        $appointment->update($request->validated());
 
         return redirect()->route('appointment.index')
             ->with('success', 'Appointment updated successfully.');
@@ -139,7 +123,7 @@ public function index(Request $request)
     /**
      * Delete an appointment.
      */
-    public function destroy($id)
+    public function destroy(int|string $id): RedirectResponse
     {
         $appointment = Appointment::findOrFail($id);
         $appointment->delete();
@@ -151,13 +135,9 @@ public function index(Request $request)
     /**
      * Cancel appointments by selected date.
      */
-    public function cancelByDate(Request $request)
+    public function cancelByDate(CancelAppointmentsByDateRequest $request): RedirectResponse
     {
-        $request->validate([
-            'date' => 'required|date',
-        ]);
-
-        $selectedDate = $request->date;
+        $selectedDate = $request->validated('date');
 
         Appointment::whereDate('created_at', $selectedDate)
             ->update(['status' => 'Cancelled']);

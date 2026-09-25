@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            // Add gender column after 'phone' (or wherever you prefer)
-            $table->enum('gender', ['Male', 'Female', 'Other'])->nullable()->after('phone');
-
-            // Add age column (unsigned integer) after gender
-            $table->unsignedInteger('age')->nullable()->after('gender');
+            $table->string('time')->nullable()->after('age');
+            $table->text('notes')->nullable()->after('status');
+            $table->text('diagnosis')->nullable()->after('notes');
+            $table->text('medicine_suggestions')->nullable()->after('diagnosis');
         });
     }
 
@@ -26,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->dropColumn(['gender', 'age']);
+            $table->dropColumn(['time', 'notes', 'diagnosis', 'medicine_suggestions']);
         });
     }
 };
