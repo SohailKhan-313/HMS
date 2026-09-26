@@ -501,3 +501,29 @@ test('hospital payments page dynamically displays expense categories from db and
         'net_amount' => 11500.00,
     ]);
 });
+
+test('topbar displays whatsapp and email contacts and includes ai assistant widget', function () {
+    $response = $this->get(route('welcome'));
+
+    $response->assertOk();
+    // WhatsApp direct contact
+    $response->assertSee('03470232059');
+    $response->assertSee('https://wa.me/923470232059', false);
+    $response->assertSee('bi-whatsapp', false);
+
+    // Email direct contact
+    $response->assertSee('skpattan850911@gmail.com');
+    $response->assertSee('mailto:skpattan850911@gmail.com', false);
+    $response->assertSee('bi-envelope-at-fill', false);
+
+    // AI Assistant Widget included
+    $response->assertSee('hms-chatbot-container', false);
+    $response->assertSee('hms-chatbot-launcher', false);
+    $response->assertSee('HMS Medical AI', false);
+
+    // Unnecessary dummy template elements are removed
+    $response->assertDontSee('app-emailbox.html');
+    $response->assertDontSee('app-to-do.html');
+    $response->assertDontSee('Amelio Joly');
+    $response->assertDontSee('Jhon Deo');
+});

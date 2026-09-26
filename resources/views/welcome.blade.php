@@ -18,7 +18,7 @@
                     <p class="mb-0 text-muted font-13">Real-time overview of patients, daily appointments, medical roster, and clinical finances.</p>
                 </div>
                 <div class="d-flex align-items-center flex-wrap gap-2">
-                    <button type="button" class="btn btn-dark btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="document.getElementById('hms-chatbot-launcher').click()">
+                    <button type="button" class="btn btn-dark btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="if(typeof window.toggleHMSChatbot === 'function'){ window.toggleHMSChatbot(true); } else { document.getElementById('hms-chatbot-launcher')?.click(); }">
                         <i class="bi bi-robot text-info"></i> AI Assistant
                     </button>
                     <a href="{{ route('appointment.index') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
@@ -164,7 +164,7 @@
                         <button type="button" class="btn btn-outline-light btn-sm rounded-pill font-12" onclick="openChatWithPrompt('What are today appointments?')">
                             📅 Today's Schedule
                         </button>
-                        <button type="button" class="btn btn-info btn-sm rounded-pill font-12 fw-semibold shadow-sm" onclick="document.getElementById('hms-chatbot-launcher').click()">
+                        <button type="button" class="btn btn-info btn-sm rounded-pill font-12 fw-semibold shadow-sm" onclick="if(typeof window.toggleHMSChatbot === 'function'){ window.toggleHMSChatbot(true); } else { document.getElementById('hms-chatbot-launcher')?.click(); }">
                             <i class="bi bi-chat-dots-fill me-1"></i> Open AI Assistant
                         </button>
                     </div>

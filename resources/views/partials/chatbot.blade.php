@@ -114,7 +114,7 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    z-index: 1060;
+    z-index: 99999;
     font-family: inherit;
 }
 
@@ -345,7 +345,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Toggle Chatbot Panel
     function toggleChat(open) {
-        if (open) {
+        const isCurrentlyOpen = panel.style.display === "flex";
+        const shouldOpen = (typeof open === "boolean") ? open : !isCurrentlyOpen;
+        if (shouldOpen) {
             panel.style.display = "flex";
             launcher.style.display = "none";
             input.focus();
@@ -406,19 +408,24 @@ document.addEventListener("DOMContentLoaded", function () {
         // Show typing indicator
         showTyping(true);
 
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            || (document.querySelector('input[name="_token"]') ? document.querySelector('input[name="_token"]').value : "{{ csrf_token() }}");
+
         // Send POST request
         fetch("{{ route('chatbot.message') }}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]') ? document.querySelector('input[name="_token"]').value : "{{ csrf_token() }}"
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify({ message: text })
         })
-        .then(response => {
+        .then(async response => {
             if (!response.ok) {
-                throw new Error("Network response was not ok");
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.message || ("HTTP " + response.status));
             }
             return response.json();
         })
@@ -433,7 +440,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(err => {
             console.error("Chatbot Error:", err);
             showTyping(false);
-            appendMessage("bot", "⚠️ Unable to connect to hospital assistant server. Please check your connection.");
+            appendMessage("bot", "⚠️ Unable to connect to hospital assistant server: " + (err.message || "Please check your network."));
         });
     }
 
