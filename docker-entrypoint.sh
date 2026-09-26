@@ -62,9 +62,10 @@ php artisan view:cache || true
 chown -R www-data:www-data /var/www/html/storage \
                            /var/www/html/bootstrap/cache \
                            /var/www/html/database \
+                           /var/www/html/public \
                            /var/www/html/.env
 chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/database
+chmod -R 775 /var/www/html/database /var/www/html/public
 chmod 664 /var/www/html/.env /var/www/html/database/database.sqlite 2>/dev/null || true
 chmod 666 /var/www/html/storage/logs/laravel.log 2>/dev/null || true
 
