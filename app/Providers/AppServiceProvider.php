@@ -22,8 +22,11 @@ class AppServiceProvider extends ServiceProvider
         if (
             app()->environment('production') ||
             request()->header('x-forwarded-proto') === 'https' ||
+            request()->header('x-forwarded-ssl') === 'on' ||
             (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ||
-            (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+            (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+            str_contains((string) config('app.url'), 'https://') ||
+            str_contains((string) request()->getHost(), 'railway.app')
         ) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }

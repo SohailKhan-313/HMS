@@ -65,4 +65,15 @@ class ReportController extends Controller
     {
         return $this->pdfService->exportExpensesPdf();
     }
+
+    /**
+     * Export hospital payments financial statement to PDF.
+     */
+    public function paymentsPdf(Request $request): Response
+    {
+        return $this->pdfService->exportPaymentsPdf(
+            $request->query('start_date'),
+            $request->query('end_date')
+        );
+    }
 }

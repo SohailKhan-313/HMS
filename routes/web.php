@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\ExpenseCatagoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\HospitalPaymentController;
 use App\Http\Controllers\PatientHistoryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StaffController;
@@ -90,9 +91,7 @@ Route::prefix('patients')->name('patients.')->group(function () {
 });
 
 // Hospital Payments (Billing & Reports)
-Route::get('/hospital-payments', function () {
-    return view('hospital-payments');
-})->name('hospital-payments');
+Route::get('/hospital-payments', [HospitalPaymentController::class, 'index'])->name('hospital-payments');
 
 // FPDF Table Export & PDF Printing
 Route::prefix('reports')->name('reports.')->group(function () {
@@ -103,6 +102,7 @@ Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/doctors/pdf', [ReportController::class, 'doctorsPdf'])->name('doctors.pdf');
     Route::get('/staff/pdf', [ReportController::class, 'staffPdf'])->name('staff.pdf');
     Route::get('/expenses/pdf', [ReportController::class, 'expensesPdf'])->name('expenses.pdf');
+    Route::get('/payments/pdf', [ReportController::class, 'paymentsPdf'])->name('payments.pdf');
 });
 
 // AI Medical Assistant & Hospital Chatbot

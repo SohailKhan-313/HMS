@@ -18,7 +18,16 @@
   <link href="{{asset('/css/style.css')}}" rel="stylesheet" />
   <link href="{{asset('/css/icons.css')}}" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Core JS: jQuery & Bootstrap 5 Bundle (loaded in head so all child views have bootstrap and $ ready) -->
+  <script src="{{ asset('/js/jquery.min.js') }}"></script>
+  <script src="{{ asset('/js/bootstrap.bundle.min.js') }}"></script>
+  <script>
+    if (typeof bootstrap === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"><\/script>');
+    }
+  </script>
 
   <!-- loader-->
   <link href="{{ asset('/css/pace.min.css') }}" rel="stylesheet" />
@@ -682,10 +691,7 @@
   <!--end wrapper-->
 
 
-  <!-- Bootstrap bundle JS -->
-  <script src="{{asset('/js/bootstrap.bundle.min.js')}}"></script>
   <!--plugins-->
-  <script src="{{asset('/js/jquery.min.js')}}"></script>
   <script src="{{asset('/plugins/simplebar/js/simplebar.min.js')}}"></script>
   <script src="{{asset('/plugins/metismenu/js/metisMenu.min.js')}}"></script>
   <script src="{{asset('/plugins/easyPieChart/jquery.easypiechart.js')}}"></script>

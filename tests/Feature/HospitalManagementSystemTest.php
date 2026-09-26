@@ -354,3 +354,12 @@ test('chatbot provides hospital records information and medical triage suggestio
     ]);
     $emptyRes->assertStatus(422);
 });
+
+test('bootstrap and jquery assets are properly loaded in the layout', function () {
+    $response = $this->get(route('welcome'));
+
+    $response->assertOk();
+    $response->assertSee('/css/bootstrap.min.css');
+    $response->assertSee('/js/bootstrap.bundle.min.js');
+    $response->assertSee('/js/jquery.min.js');
+});

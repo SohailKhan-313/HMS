@@ -8,11 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap"
     rel="stylesheet">
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
     /* Minimal custom overrides – exactly from Staff list */
@@ -480,21 +475,12 @@
                     // TIME MODAL (shared for Add & Edit)
                     // ============================================
                     document.addEventListener('DOMContentLoaded', function() {
-                        if (typeof bootstrap === 'undefined') {
-                            console.error('Bootstrap JavaScript is not loaded!');
-                            return;
-                        }
-
                         // Current prefix – will be set by openTimeModal
                         let currentTimeModalPrefix = '';
 
                         // Expose openTimeModal globally
                         window.openTimeModal = function(day, prefix = '') {
                             currentTimeModalPrefix = prefix;
-                            console.log('openTimeModal called', {
-                                day,
-                                prefix
-                            }); // Debug
 
                             const currentDayInput = document.getElementById('current_day');
                             if (!currentDayInput) {
@@ -520,8 +506,12 @@
 
                             // **FIX Z-INDEX**: ensure time modal appears above edit modal
                             timeModalEl.style.zIndex = '1060'; // higher than default modal (1055)
-                            const modal = new bootstrap.Modal(timeModalEl);
-                            modal.show();
+                            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                const modal = bootstrap.Modal.getOrCreateInstance(timeModalEl);
+                                modal.show();
+                            } else if (window.$) {
+                                $(timeModalEl).modal('show');
+                            }
 
                             // Restore z-index when hidden (optional)
                             timeModalEl.addEventListener('hidden.bs.modal', function() {
@@ -606,11 +596,6 @@
                     };
 
                     window.openEditModal = function(doctor) {
-                        if (typeof bootstrap === 'undefined') {
-                            console.error('Bootstrap JavaScript is not loaded!');
-                            return;
-                        }
-
                         // Set form action
                         const form = document.getElementById('editDoctorForm');
                         if (form) form.action = `/doctors/update/${doctor.id}`;
@@ -652,8 +637,12 @@
                         if (modalEl) {
                             // Reset z-index before showing (in case it was changed)
                             modalEl.style.zIndex = '';
-                            const modal = new bootstrap.Modal(modalEl);
-                            modal.show();
+                            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                                modal.show();
+                            } else if (window.$) {
+                                $(modalEl).modal('show');
+                            }
                         } else {
                             console.error('Element #editDoctorModal not found');
                         }

@@ -1,346 +1,301 @@
 @extends('layout.master')
+
 @section('content')
-
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<!-- Google Font: Inter -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
-
-<style>
-    /* Base styles (same as provided) */
-    body {
-        background: #f1f5f9;
-        font-family: 'helvetica', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-    }
-    .history-card {
-        border: none;
-        border-radius: 24px;
-        box-shadow: 0 20px 35px -8px rgba(173, 44, 44, 0.34);
-        overflow: hidden;
-        background: white;
-        margin-bottom: 2rem;
-    }
-    .card-header {
-        background-color: white;
-        border-bottom: 1px solid #e9eef2;
-        padding: 1.75rem 2rem 1rem 2rem;
-    }
-    .card-header h2 {
-        font-weight: 600;
-        font-size: 2rem;
-        color: #0b1b2f;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    .card-header h2 i {
-        font-size: 2rem;
-        color: #2a7de1;
-        background: #eef4fe;
-        padding: 0.5rem;
-        border-radius: 14px;
-    }
-    .table thead th {
-        color: #4a5f7a;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        border-bottom-width: 1.5px;
-        border-bottom-color: #dfe7ef;
-        padding: 1.1rem 0.8rem 0.9rem 0.8rem;
-        background-color: white;
-    }
-    .table tbody td {
-        padding: 1rem 0.8rem;
-        vertical-align: middle;
-        color: #1f2c41;
-        border-bottom: 1px solid #edf2f7;
-    }
-    .table tbody tr:hover td {
-        background-color: #f9fcff;
-    }
-    .phone-pill {
-        background: #f4f7fb;
-        padding: 0.2rem 0.8rem;
-        border-radius: 30px;
-        font-family: 'Inter', monospace;
-        font-size: 0.9rem;
-        display: inline-block;
-        white-space: nowrap;
-    }
-    .badge-cnic {
-        background: #ecf1f6;
-        color: #1a3c5e;
-        padding: 0.2rem 0.8rem;
-        border-radius: 30px;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-    .amount {
-        font-weight: 500;
-        color: #0b3b4e;
-    }
-    .action-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        align-items: flex-start;
-    }
-    .action-btn-sm {
-        background: white;
-        border: 1px solid #d5e0ec;
-        color: #2f5681;
-        border-radius: 30px;
-        padding: 0.2rem 1rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        white-space: nowrap;
-        transition: 0.1s;
-        text-decoration: none;
-    }
-    .action-btn-sm i {
-        font-size: 0.8rem;
-    }
-    .action-btn-sm:hover {
-        background: #e3ecf5;
-        border-color: #b0c6dd;
-    }
-    .date-pill {
-        background: #f4f7fb;
-        padding: 0.4rem 1.2rem;
-        border-radius: 40px;
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: #1f3a5e;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        border: 1px solid #d5e0ec;
-    }
-    .btn-outline-secondary-pill {
-        background: white;
-        border: 1px solid #d5e0ec;
-        color: #2f5681;
-        border-radius: 40px;
-        padding: 0.4rem 1.5rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: 0.15s;
-    }
-    .btn-outline-secondary-pill:hover {
-        background: #e3ecf5;
-        border-color: #b0c6dd;
-    }
-    .btn-primary-pill {
-        background: #2a7de1;
-        border: 1px solid #2a7de1;
-        color: white;
-        border-radius: 40px;
-        padding: 0.4rem 1.5rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: 0.15s;
-    }
-    .btn-primary-pill:hover {
-        background: #1d5bbf;
-        border-color: #1d5bbf;
-    }
-    .no-data-row td {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: #7589a2;
-        font-style: italic;
-        font-size: 1rem;
-    }
-    /* New styles for summary blocks */
-    .stat-block {
-        background: #64acbe;
-        border-radius: 16px;
-        padding: 1.2rem;
-        height: 100%;
-    }
-    .stat-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #4a5f7a;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        margin-bottom: 0.75rem;
-    }
-    .stat-main {
-        font-size: 2rem;
-        font-weight: 600;
-        color: #0b1b2f;
-        margin-bottom: 0.5rem;
-    }
-    .stat-breakdown {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        font-size: 0.9rem;
-        color: #1f2c41;
-    }
-    .stat-breakdown li {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.2rem 0;
-        border-bottom: 1px dashed #e2e8f0;
-    }
-    .stat-breakdown li:last-child {
-        border-bottom: none;
-    }
-</style>
 <main class="page-content">
-<div class="container-fluid px-4">
-    <!-- ========== SUMMARY CARD (from first image) ========== -->
-    <div class="history-card">
-        <div class="card-header">
-            <h2>
-                <i class="bi bi-calendar-plus"></i>
-                Create Appointment
-            </h2>
+<div class="container-fluid px-3 px-md-4">
+
+    <!-- ========== SUMMARY & FINANCIAL KPI CARD ========== -->
+    <div class="card radius-10 border-0 shadow-sm mb-4">
+        <div class="card-header bg-transparent py-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 24px;">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold text-dark">Hospital Payments &amp; Financial Overview</h4>
+                        <small class="text-muted">Real-time revenue, consultation billing, operating expenses, and patient accounts</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{{ route('reports.payments.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-file-earmark-pdf"></i> Print Financial Statement (PDF)
+                    </a>
+                    <a href="{{ route('hospital-payments') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
+                    </a>
+                </div>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <!-- Date selection row -->
-            <div class="d-flex flex-wrap gap-3 mb-4">
-                <span class="date-pill"><i class="bi bi-calendar"></i> Start: 05/20/2025</span>
-                <span class="date-pill"><i class="bi bi-calendar"></i> End: —</span>
-                <span class="date-pill"><i class="bi bi-clock"></i> Time: 12:00 am</span>
-                <span class="date-pill"><i class="bi bi-sliders2"></i> Range: —</span>
+
+        <div class="card-body p-3 p-md-4">
+            <!-- Filter Toolbar -->
+            <form method="GET" action="{{ route('hospital-payments') }}" class="row g-2 align-items-end mb-4 bg-light p-3 rounded-3 border">
+                <div class="col-12 col-md-3">
+                    <label class="form-label font-12 fw-semibold text-secondary mb-1">Start Date</label>
+                    <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate }}">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label font-12 fw-semibold text-secondary mb-1">End Date</label>
+                    <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $endDate }}">
+                </div>
+                <div class="col-12 col-md-4 d-flex gap-1 flex-wrap">
+                    <button type="submit" class="btn btn-primary btn-sm px-3">
+                        <i class="bi bi-filter me-1"></i> Apply Filter
+                    </button>
+                    <a href="{{ route('hospital-payments', ['filter' => 'today']) }}" class="btn btn-sm {{ $filterType === 'today' ? 'btn-dark' : 'btn-outline-secondary' }}">Today</a>
+                    <a href="{{ route('hospital-payments', ['filter' => 'week']) }}" class="btn btn-sm {{ $filterType === 'week' ? 'btn-dark' : 'btn-outline-secondary' }}">This Week</a>
+                    <a href="{{ route('hospital-payments', ['filter' => 'month']) }}" class="btn btn-sm {{ $filterType === 'month' ? 'btn-dark' : 'btn-outline-secondary' }}">This Month</a>
+                </div>
+                <div class="col-12 col-md-2 text-md-end">
+                    <span class="badge bg-white text-dark border px-2 py-2 font-12 d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-calendar3 text-primary"></i> 
+                        {{ $startDate ? \Carbon\Carbon::parse($startDate)->format('d M') : 'All Time' }}
+                        @if($endDate && $endDate !== $startDate) - {{ \Carbon\Carbon::parse($endDate)->format('d M') }} @endif
+                    </span>
+                </div>
+            </form>
+
+            <!-- 3 Main Summary Blocks (Matching Requested Structure) -->
+            <div class="row g-3 mb-3">
+                <!-- Block 1: Total Sales -->
+                <div class="col-12 col-lg-4">
+                    <div class="h-100 p-3 rounded-3 border" style="background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase font-12 fw-bold text-success">Total Sales &amp; Billing</span>
+                            <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-cash-stack"></i> Gross</span>
+                        </div>
+                        <h3 class="fw-bold text-dark mb-3">Rs. {{ number_format($totalSales, 0) }}</h3>
+                        <ul class="list-unstyled mb-0 font-13">
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Consultation Billing</span>
+                                <span class="fw-bold text-dark">Rs. {{ number_format($consultationSales, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Pharmacy / Medicines</span>
+                                <span class="text-muted">Rs. {{ number_format($medicineSales, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">General Procedures</span>
+                                <span class="text-muted">Rs. {{ number_format($procedureSales, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Diagnostics / Lab</span>
+                                <span class="text-muted">Rs. {{ number_format($labSales, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Discounts Applied</span>
+                                <span class="text-danger fw-semibold">Rs. {{ number_format($totalDiscount, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between pt-2 fw-bold text-dark">
+                                <span>Hospital Gross Share</span>
+                                <span class="text-success">Rs. {{ number_format($consultationSales, 0) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Block 2: Hospital Revenue -->
+                <div class="col-12 col-lg-4">
+                    <div class="h-100 p-3 rounded-3 border" style="background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase font-12 fw-bold text-primary">Hospital Net Revenue</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary"><i class="bi bi-graph-up-arrow"></i> Net Profit</span>
+                        </div>
+                        <h3 class="fw-bold text-primary mb-3">Rs. {{ number_format($netRevenue, 0) }}</h3>
+                        <ul class="list-unstyled mb-0 font-13">
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Gross Consultations</span>
+                                <span class="fw-bold text-dark">Rs. {{ number_format($consultationSales, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Daily Operational Expenses</span>
+                                <span class="text-danger fw-semibold">- Rs. {{ number_format($dailyExpenses, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Staff Payroll Liability</span>
+                                <span class="text-muted">Rs. {{ number_format($staffPayroll, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between pt-2 fw-bold">
+                                <span class="text-dark">Operating Balance</span>
+                                <span class="{{ $netRevenue > 0 ? 'text-primary' : 'text-danger' }}">Rs. {{ number_format($netRevenue, 0) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Block 3: Patient Accounts & Dues -->
+                <div class="col-12 col-lg-4">
+                    <div class="h-100 p-3 rounded-3 border" style="background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-uppercase font-12 fw-bold text-warning-emphasis">Patient Accounts &amp; Dues</span>
+                            <span class="badge bg-warning bg-opacity-25 text-dark"><i class="bi bi-person-lines-fill"></i> Balances</span>
+                        </div>
+                        <h3 class="fw-bold text-danger mb-3">Rs. {{ number_format($totalDueAmount, 0) }}</h3>
+                        <ul class="list-unstyled mb-0 font-13">
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Total Outstanding Dues</span>
+                                <span class="text-danger fw-bold">Rs. {{ number_format($totalDueAmount, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Patient Wallet / Credit</span>
+                                <span class="text-success fw-bold">Rs. {{ number_format($totalWalletAmount, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary">Avg Consultation Charge</span>
+                                <span class="fw-semibold text-dark">Rs. {{ number_format($avgFeePerVisit, 0) }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between pt-2 fw-bold text-dark">
+                                <span>Collection Efficiency</span>
+                                <span class="badge bg-success bg-opacity-10 text-success">{{ $collectionRate }}%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
-            <!-- Stats grid -->
-            <div class="row g-4">
-                <!-- Total Sales -->
-                <div class="col-md-4">
-                    <div class="stat-block">
-                        <div class="stat-title">Total Sales</div>
-                        <div class="stat-main">Rs. 4,000</div>
-                        <ul class="stat-breakdown">
-                            <li><span>Consultation</span> <span>4,000 ₦</span></li>
-                            <li><span>Medicines</span> <span>0 ₦</span></li>
-                            <li><span>General</span> <span>0 ₦</span></li>
-                            <li><span>Procedures</span> <span>0 ₦</span></li>
-                            <li><span>Lab Tests</span> <span>0 ₦</span></li>
-                            <li><span>Tot. Disc</span> <span>0 ₦</span></li>
-                            <li><span>Hosp Disc</span> <span>0 ₦</span></li>
-                        </ul>
+            <!-- Bottom 2 Counters Side-by-Side (from original design) -->
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <div class="p-3 rounded-3 border bg-light-subtle d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-uppercase font-12 fw-semibold text-secondary">Total Registered Patients</span>
+                            <h4 class="mb-0 fw-bold text-dark mt-1">{{ number_format($totalPatients) }}</h4>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 text-info d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 20px;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Hospital Revenue -->
-                <div class="col-md-4">
-                    <div class="stat-block">
-                        <div class="stat-title">Hospital Revenue</div>
-                        <div class="stat-main">Rs. 2,800</div>
-                        <ul class="stat-breakdown">
-                            <li><span>Daily Expense</span> <span>0 ₦</span></li>
-                            <li><span>Net Revenue</span> <span>2,800 ₦</span></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Payment Methods -->
-                <div class="col-md-4">
-                    <div class="stat-block">
-                        <div class="stat-title">Payment Methods</div>
-                        <div class="stat-main">Rs. 2,000</div>
-                        <ul class="stat-breakdown">
-                            <li><span>EasyPaisa! Sales</span> <span>0 ₦</span></li>
-                            <li><span>JazCash! Sales</span> <span>0 ₦</span></li>
-                            <li><span>Card</span> <span>110 ₦</span></li>
-                            <li><span>Other Sales</span> <span>0 ₦</span></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Total Patients & Total Appointments (side by side) -->
-                <div class="col-md-6">
-                    <div class="stat-block d-flex flex-column h-100">
-                        <div class="stat-title">Total Patients</div>
-                        <div class="stat-main">2</div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="stat-block d-flex flex-column h-100">
-                        <div class="stat-title">Total Appointments</div>
-                        <div class="stat-main">2</div>
+                <div class="col-12 col-md-6">
+                    <div class="p-3 rounded-3 border bg-light-subtle d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-uppercase font-12 fw-semibold text-secondary">Total Appointments Filtered</span>
+                            <h4 class="mb-0 fw-bold text-dark mt-1">{{ number_format($totalAppointments) }}</h4>
+                        </div>
+                        <div class="rounded-circle bg-purple bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 20px;">
+                            <i class="bi bi-calendar-check-fill"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ========== APPOINTMENTS TABLE (from second image) ========== -->
-    <div class="history-card">
-        <div class="card-header">
-            <h2>
-                <i class="bi bi-calendar-check"></i>
-                Today's Appointments
-            </h2>
+    <!-- ========== APPOINTMENTS & CONSULTATION BILLING TABLE ========== -->
+    <div class="card radius-10 border-0 shadow-sm">
+        <div class="card-header bg-transparent py-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-receipt text-primary"></i> Consultation Payments &amp; Appointments
+                </h5>
+                <small class="text-muted">Showing {{ $appointments->count() }} of {{ $appointments->total() }} recorded consultations</small>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('appointment.index') }}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-calendar-plus me-1"></i> Manage Appointments
+                </a>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <!-- Optional toolbar (like reload/print) could go here, but we keep it minimal to match the image -->
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light font-13 text-secondary">
                         <tr>
-                            <th>Appointment Id</th>
-                            <th>Appointment Info</th>
+                            <th class="ps-3">Appointment ID</th>
+                            <th>Date &amp; Time</th>
                             <th>Patient Name</th>
-                            <th>Patient Phone No</th>
-                            <th>Total Expense</th>
-                            <th>Actions</th>
+                            <th>Patient Phone</th>
+                            <th>Doctor &amp; Specialty</th>
+                            <th class="text-end">Consultation Fee</th>
+                            <th>Status</th>
+                            <th class="text-end pe-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Row 1 from image -->
-                        <tr>
-                            <td><span class="badge-cnic">64409</span></td>
-                            <td>20/05/2025 11:15 AM</td>
-                            <td>haseeb</td>
-                            <td><span class="phone-pill">925632478357</span></td>
-                            <td class="amount">2000</td>
-                            <td>
-                                <a href="#" class="action-btn-sm">
-                                    View Details <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <!-- Row 2 from image -->
-                        <tr>
-                            <td><span class="badge-cnic">64433</span></td>
-                            <td>20/05/2025 12:45 PM</td>
-                            <td>Barrera</td>
-                            <td><span class="phone-pill">925765346245</span></td>
-                            <td class="amount">2000</td>
-                            <td>
-                                <a href="#" class="action-btn-sm">
-                                    View Details <i class="bi bi-chevron-right"></i>
-                                </a>
-                            </td>
-                        </tr>
+                        @forelse($appointments as $apt)
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="badge bg-light text-dark border px-2 py-1 font-12 fw-bold">
+                                        #APT-{{ str_pad($apt->id, 5, '0', STR_PAD_LEFT) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="font-13 fw-semibold text-dark">
+                                        {{ $apt->created_at ? $apt->created_at->format('d/m/Y') : '-' }}
+                                    </div>
+                                    <small class="text-muted font-11">
+                                        {{ $apt->time ?: ($apt->created_at ? $apt->created_at->format('h:i A') : '-') }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">{{ $apt->name }}</span>
+                                    @if($apt->age)
+                                        <small class="text-muted font-11">({{ $apt->age }} yrs)</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-secondary border rounded-pill px-2 py-1 font-12 font-monospace">
+                                        {{ $apt->phone ?: 'N/A' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">
+                                        {{ $apt->doctor ? $apt->doctor->name : 'General Medical Officer' }}
+                                    </div>
+                                    <small class="text-muted font-11">
+                                        {{ $apt->doctor ? $apt->doctor->speciality : 'General OPD' }}
+                                    </small>
+                                </td>
+                                <td class="text-end fw-bold text-success">
+                                    Rs. {{ number_format($apt->doctor ? (float)$apt->doctor->fee : 0, 0) }}
+                                </td>
+                                <td>
+                                    @php
+                                        $st = strtolower($apt->status ?? 'pending');
+                                        $badgeClass = match($st) {
+                                            'completed' => 'bg-success',
+                                            'confirmed' => 'bg-primary',
+                                            'cancelled' => 'bg-danger',
+                                            default => 'bg-warning text-dark',
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }} font-11 px-2 py-1 rounded-pill">
+                                        {{ ucfirst($apt->status ?: 'Pending') }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{{ route('appointment.show', $apt->id) }}" class="btn btn-outline-secondary btn-sm px-2 py-1 font-11" title="View Details">
+                                            <i class="bi bi-eye"></i> Details
+                                        </a>
+                                        <a href="{{ route('pdf.appointment', $apt->id) }}" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 font-11" title="Print Receipt">
+                                            <i class="bi bi-receipt"></i> Slip
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-receipt-cutoff fs-2 d-block mb-2 text-secondary"></i>
+                                    No appointment payments recorded for the selected period.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-            <!-- Optional footer note -->
-            <div class="d-flex gap-3 mt-3" style="color:#7589a2; font-size:0.85rem;">
-                <i class="bi bi-info-circle"></i> Showing 2 appointments
-            </div>
         </div>
+        @if($appointments->hasPages())
+            <div class="card-footer bg-transparent py-3 border-top">
+                <div class="d-flex justify-content-center">
+                    {{ $appointments->links() }}
+                </div>
+            </div>
+        @endif
     </div>
+
 </div>
 </main>
 @endsection

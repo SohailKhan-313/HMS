@@ -950,17 +950,11 @@
                     </div>
                     <script>
                         (function () {
-                            setTimeout(function () {
-                                try {
-                                    if (document.readyState === 'loading') {
-                                        document.addEventListener('DOMContentLoaded', init);
-                                    } else {
-                                        init();
-                                    }
-                                } catch (e) {
-                                    console.error('Print script init error:', e);
-                                }
-                            }, 300);
+                            if (document.readyState === 'loading') {
+                                document.addEventListener('DOMContentLoaded', init);
+                            } else {
+                                init();
+                            }
 
                             function init() {
                                 let currentAppointment = null;
@@ -977,25 +971,18 @@
                                 // Modal elements
                                 const modalElement = document.getElementById('viewAppointmentModal');
                                 if (!modalElement) {
-                                    console.error('Modal #viewAppointmentModal not found');
-                                    return;
-                                }
-                                if (typeof bootstrap === 'undefined') {
-                                    console.error('Bootstrap JS not loaded');
                                     return;
                                 }
 
-                                let modal;
-                                try {
-                                    modal = new bootstrap.Modal(modalElement);
-                                } catch (e) {
-                                    console.error('Failed to init modal:', e);
-                                    return;
+                                function getModal() {
+                                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                        return bootstrap.Modal.getOrCreateInstance(modalElement);
+                                    }
+                                    return null;
                                 }
 
                                 const modalBodyContent = document.getElementById('viewModalContent');
                                 if (!modalBodyContent) {
-                                    console.error('#viewModalContent not found');
                                     return;
                                 }
 
@@ -1018,7 +1005,12 @@
                                         </div>
                                     </div>
                                 `;
-                                    modal.show();
+                                    const modalInstance = getModal();
+                                    if (modalInstance) {
+                                        modalInstance.show();
+                                    } else if (window.$) {
+                                        $(modalElement).modal('show');
+                                    }
 
                                     fetch(url, {
                                         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }

@@ -468,4 +468,93 @@ class PdfReportService
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="expenses_report_'.date('Ymd_His').'.pdf"');
     }
+
+    /**
+     * Export Hospital Payments and Financial Summary Report to PDF.
+     */
+    public function exportPaymentsPdf(?string $startDate = null, ?string $endDate = null): Response
+    {
+        $query = Appointment::with('doctor')->latest();
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay(),
+            ]);
+        }
+        $appointments = $query->get();
+
+        $totalConsultation = (float) $appointments->sum(fn ($apt): float => $apt->doctor ? (float) $apt->doctor->fee : 0.0);
+        $totalExpenses = (float) Expense::sum('amount');
+        $totalDues = (float) PatientHistory::sum('due_amount');
+        $netRevenue = max(0.0, $totalConsultation - $totalExpenses);
+
+        $pdf = new HospitalPdfDocument('P', 'mm', 'A4');
+        $pdf->reportTitle = 'Hospital Payments & Financial Statement';
+        $pdf->subTitle = ($startDate && $endDate)
+            ? 'Period: '.Carbon::parse($startDate)->format('d M Y').' to '.Carbon::parse($endDate)->format('d M Y')
+            : 'All Recorded Transactions & Appointments';
+        $pdf->AliasNbPages();
+        $pdf->AddPage();
+
+        // Financial Overview Cards
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFillColor(241, 245, 249);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell(47, 8, 'TOTAL SALES', 1, 0, 'C', true);
+        $pdf->Cell(47, 8, 'DAILY EXPENSES', 1, 0, 'C', true);
+        $pdf->Cell(47, 8, 'NET REVENUE', 1, 0, 'C', true);
+        $pdf->Cell(49, 8, 'PATIENT DUES', 1, 1, 'C', true);
+
+        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->SetTextColor(37, 99, 235);
+        $pdf->Cell(47, 8, 'Rs. '.number_format($totalConsultation, 2), 1, 0, 'C');
+        $pdf->SetTextColor(185, 28, 28);
+        $pdf->Cell(47, 8, 'Rs. '.number_format($totalExpenses, 2), 1, 0, 'C');
+        $pdf->SetTextColor(16, 185, 129);
+        $pdf->Cell(47, 8, 'Rs. '.number_format($netRevenue, 2), 1, 0, 'C');
+        $pdf->SetTextColor(217, 119, 6);
+        $pdf->Cell(49, 8, 'Rs. '.number_format($totalDues, 2), 1, 1, 'C');
+
+        $pdf->Ln(5);
+
+        // Table Header
+        $pdf->SetFont('Arial', 'B', 8);
+        $pdf->SetFillColor(30, 58, 138);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->Cell(20, 7, '#APT ID', 1, 0, 'C', true);
+        $pdf->Cell(35, 7, 'Date & Time', 1, 0, 'C', true);
+        $pdf->Cell(45, 7, 'Patient Name', 1, 0, 'L', true);
+        $pdf->Cell(50, 7, 'Specialist Doctor', 1, 0, 'L', true);
+        $pdf->Cell(40, 7, 'Consultation Fee (Rs.)', 1, 1, 'R', true);
+
+        // Table Body
+        $pdf->SetFont('Arial', '', 8);
+        $fill = false;
+        foreach ($appointments as $apt) {
+            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
+            $pdf->SetTextColor(30, 41, 59);
+
+            $pdf->Cell(20, 6, '#APT-'.str_pad((string) $apt->id, 4, '0', STR_PAD_LEFT), 1, 0, 'C', $fill);
+            $pdf->Cell(35, 6, $apt->created_at ? $apt->created_at->format('d M Y h:i A') : '-', 1, 0, 'C', $fill);
+            $pdf->Cell(45, 6, substr($apt->name, 0, 24), 1, 0, 'L', $fill);
+            $docName = $apt->doctor ? substr($apt->doctor->name, 0, 26) : 'Unassigned';
+            $pdf->Cell(50, 6, $docName, 1, 0, 'L', $fill);
+            $fee = $apt->doctor ? (float) $apt->doctor->fee : 0.0;
+            $pdf->Cell(40, 6, number_format($fee, 2), 1, 1, 'R', $fill);
+
+            $fill = ! $fill;
+        }
+
+        // Summary Total Row
+        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFillColor(241, 245, 249);
+        $pdf->SetTextColor(15, 23, 42);
+        $pdf->Cell(150, 8, 'TOTAL ACCUMULATED CONSULTATION BILLING:', 1, 0, 'R', true);
+        $pdf->SetTextColor(37, 99, 235);
+        $pdf->Cell(40, 8, 'Rs. '.number_format($totalConsultation, 2), 1, 1, 'R', true);
+
+        return response($pdf->Output('S'))
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="hospital_payments_'.date('Ymd_His').'.pdf"');
+    }
 }
