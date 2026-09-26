@@ -291,6 +291,9 @@
                     Doctors
                 </h2>
                 <div class="d-flex gap-2">
+                    <a href="{{ route('reports.doctors.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm shadow-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-file-earmark-pdf"></i> Print / Export (PDF)
+                    </a>
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#doctorModal">
                         <i class="bi bi-plus-circle me-2"></i> New Doctor
                     </button>

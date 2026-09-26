@@ -246,9 +246,9 @@
                     <button class="btn btn-outline-filter btn-sm" onclick="location.reload()">
                         <i class="bi bi-arrow-clockwise"></i> Reload
                     </button>
-                    <button class="btn btn-outline-filter btn-sm" onclick="window.print()">
-                        <i class="bi bi-printer"></i> Print
-                    </button>
+                    <a href="{{ route('reports.expenses.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-file-earmark-pdf"></i> Print / Export (PDF)
+                    </a>
                     <button class="btn btn-primary-custom btn-sm" data-bs-toggle="modal" data-bs-target="#expenseModal">
                         <i class="bi bi-plus-circle me-2"></i> Add Expense
                     </button>

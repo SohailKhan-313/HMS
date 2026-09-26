@@ -294,6 +294,9 @@
                             <i class="bi bi-funnel "></i>Filter
                         </span>
                     </div>
+                    <a href="{{ route('reports.staff.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm shadow-sm d-flex align-items-center gap-1">
+                        <i class="bi bi-file-earmark-pdf"></i> Print / Export (PDF)
+                    </a>
                     <!-- New Staff Button -->
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#staffModal">
                         <i class="bi bi-plus-circle me-2"></i> New Staff

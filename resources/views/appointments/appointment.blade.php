@@ -362,14 +362,24 @@
                 <!-- Header: Create Appointment (icon + title) -->
                 <div class="card-header d-flex align-items-center flex-wrap gap-3">
 
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#appointmentModal">
-                        <i class="bi bi-calendar-plus-fill me-2"></i> Create Appointment
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#appointmentModal">
+                            <i class="bi bi-calendar-plus-fill me-1"></i> Create Appointment
+                        </button>
+                        <a href="{{ route('reports.appointments.pdf', ['search' => request('search')]) }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
+                            <i class="bi bi-file-earmark-pdf"></i> Print Table (PDF)
+                        </a>
+                    </div>
                     <div class="d-flex gap-2 ms-auto">
                         <form id="searchForm" method="GET" action="{{ route('appointment.index') }}">
-                            <input class="form-control form-control-sm" type="text" name="search" id="patientSearch"
-                                placeholder="Search patient..." value="{{ request('search') }}"
-                                onkeyup="document.getElementById('searchForm').submit();">
+                            <div class="input-group input-group-sm">
+                                <input class="form-control" type="text" name="search" id="patientSearch"
+                                    placeholder="Search patient..." value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                                @if(request('search'))
+                                    <a href="{{ route('appointment.index') }}" class="btn btn-outline-secondary">Clear</a>
+                                @endif
+                            </div>
                         </form>
                     </div>
                     <!-- optional placeholder to keep header balanced, but we omit extra buttons -->
@@ -381,18 +391,16 @@
 
 
                     <!-- Date row + Cancel button -->
-                    <form action="{{ route('appointments.cancelToday') }}" method="POST" style="display:inline;"
+                    <form action="{{ route('appointments.cancelToday', absolute: false) }}" method="POST" class="d-inline-flex align-items-center flex-wrap gap-2"
                         onsubmit="return confirm('Are you sure you want to cancel appointments for this date?');">
                         @csrf
-
-
-                        <input type="date" class="form-control-sm bg-light border rounded-4 py-2 px-4 fw-semibold"
-                            style="color:#1f3a5e; border-color:#cfddee !important;" name="date" value="{{ date('Y-m-d') }}"
-                            required>
-
-
-                        <button type="submit" class="btn btn-danger ms-4">
-                            <i class="bi bi-x-circle me-2"></i>
+                        <div class="input-group input-group-sm" style="width: auto;">
+                            <span class="input-group-text bg-light text-secondary border-end-0"><i class="bi bi-calendar-event"></i></span>
+                            <input type="date" class="form-control fw-semibold"
+                                name="date" value="{{ date('Y-m-d') }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger btn-sm shadow-sm d-flex align-items-center gap-1">
+                            <i class="bi bi-x-circle"></i>
                             CANCEL APPOINTMENTS
                         </button>
                     </form>

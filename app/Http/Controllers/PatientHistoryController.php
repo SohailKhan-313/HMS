@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePatientHistoryRequest;
 use App\Http\Requests\UpdatePatientHistoryRequest;
+use App\Models\Appointment;
 use App\Models\PatientHistory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +14,7 @@ use Illuminate\View\View;
 class PatientHistoryController extends Controller
 {
     /**
-     * Display a listing of patients with search and pagination.
+     * Display a listing of patients with search, stats, and pagination.
      */
     public function index(Request $request): View
     {
@@ -31,7 +32,11 @@ class PatientHistoryController extends Controller
 
         $patients = $query->latest()->paginate(10)->withQueryString();
 
-        return view('history.p-history', compact('patients'));
+        $totalPatients = PatientHistory::count();
+        $totalDue = PatientHistory::sum('due_amount');
+        $totalWallet = PatientHistory::sum('wallet_amount');
+
+        return view('history.p-history', compact('patients', 'totalPatients', 'totalDue', 'totalWallet'));
     }
 
     /**
@@ -58,20 +63,39 @@ class PatientHistoryController extends Controller
     }
 
     /**
-     * Display the specified patient record.
+     * Display the specified patient record and their appointment logs.
      */
     public function show(int|string $id): JsonResponse|View
     {
         $patient = PatientHistory::findOrFail($id);
 
+        $appointments = Appointment::query()
+            ->where('phone', $patient->phone)
+            ->orWhere('name', 'like', "%{$patient->name}%")
+            ->with('doctor')
+            ->latest()
+            ->get();
+
         if (request()->wantsJson() || request()->ajax()) {
-            return response()->json($patient);
+            return response()->json([
+                'patient' => $patient,
+                'appointments' => $appointments,
+            ]);
         }
 
-        return view('history.p-history', [
-            'patient' => $patient,
-            'patients' => PatientHistory::latest()->paginate(10),
-        ]);
+        $patients = PatientHistory::latest()->paginate(10)->withQueryString();
+        $totalPatients = PatientHistory::count();
+        $totalDue = PatientHistory::sum('due_amount');
+        $totalWallet = PatientHistory::sum('wallet_amount');
+
+        return view('history.p-history', compact(
+            'patient',
+            'patients',
+            'appointments',
+            'totalPatients',
+            'totalDue',
+            'totalWallet'
+        ));
     }
 
     /**

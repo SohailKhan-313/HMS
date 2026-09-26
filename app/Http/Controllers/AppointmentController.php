@@ -137,12 +137,12 @@ class AppointmentController extends Controller
      */
     public function cancelByDate(CancelAppointmentsByDateRequest $request): RedirectResponse
     {
-        $selectedDate = $request->validated('date');
+        $selectedDate = $request->validated('date') ?: date('Y-m-d');
 
-        Appointment::whereDate('created_at', $selectedDate)
+        $affected = Appointment::whereDate('created_at', $selectedDate)
             ->update(['status' => 'Cancelled']);
 
-        return redirect()->back()
-            ->with('success', "All appointments on {$selectedDate} have been cancelled.");
+        return redirect()->route('appointment.index')
+            ->with('success', "{$affected} appointment(s) for {$selectedDate} have been marked as Cancelled.");
     }
 }

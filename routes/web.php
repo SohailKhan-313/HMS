@@ -7,6 +7,7 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\ExpenseCatagoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PatientHistoryController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StaffController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,7 +40,7 @@ Route::prefix('appointments')->group(function () {
     Route::delete('/delete/{id}', [AppointmentController::class, 'destroy'])->name('appointment.destroy');
     Route::delete('/{id}', [AppointmentController::class, 'destroy']);
     Route::get('/show/{id}', [AppointmentController::class, 'show'])->name('appointment.show');
-    Route::post('/cancel-today', [AppointmentController::class, 'cancelByDate'])->name('appointments.cancelToday');
+    Route::match(['post', 'put'], '/cancel-today', [AppointmentController::class, 'cancelByDate'])->name('appointments.cancelToday');
 });
 
 // Appointment Printing & Export
@@ -91,3 +92,14 @@ Route::prefix('patients')->name('patients.')->group(function () {
 Route::get('/hospital-payments', function () {
     return view('hospital-payments');
 })->name('hospital-payments');
+
+// FPDF Table Export & PDF Printing
+Route::prefix('reports')->name('reports.')->group(function () {
+    Route::get('/patients/pdf', [ReportController::class, 'patientsPdf'])->name('patients.pdf');
+    Route::get('/patients/{id}/pdf', [ReportController::class, 'patientProfilePdf'])->name('patient.profile.pdf');
+    Route::get('/patients/{id}/statement', [ReportController::class, 'patientProfilePdf'])->name('patient.pdf');
+    Route::get('/appointments/pdf', [ReportController::class, 'appointmentsPdf'])->name('appointments.pdf');
+    Route::get('/doctors/pdf', [ReportController::class, 'doctorsPdf'])->name('doctors.pdf');
+    Route::get('/staff/pdf', [ReportController::class, 'staffPdf'])->name('staff.pdf');
+    Route::get('/expenses/pdf', [ReportController::class, 'expensesPdf'])->name('expenses.pdf');
+});

@@ -2,6 +2,9 @@
 
 use App\Models\Appointment;
 use App\Models\Doctor;
+use App\Models\Expense;
+use App\Models\PatientHistory;
+use App\Models\Staff;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -202,4 +205,112 @@ test('can generate appointment pdf receipt', function () {
 
     $response->assertOk();
     expect($response->headers->get('content-type'))->toBe('application/pdf');
+});
+
+test('can generate pdf reports for all record tables', function () {
+    $doctor = Doctor::create([
+        'name' => 'Dr. Ayesha',
+        'email' => 'ayesha@hospital.test',
+        'phone' => '03004455667',
+        'speciality' => 'Gynecologist',
+        'pmdc' => 'PMC-11223-G',
+        'fee' => 2500.00,
+    ]);
+
+    $patient = PatientHistory::create([
+        'name' => 'Sobia Tariq',
+        'age' => 30,
+        'phone' => '03001234567',
+        'cnic' => '35201-9876543-2',
+        'due_amount' => 1200.00,
+        'wallet_amount' => 500.00,
+    ]);
+
+    Appointment::create([
+        'doctor_id' => $doctor->id,
+        'name' => 'Sobia Tariq',
+        'phone' => '03001234567',
+        'gender' => 'Female',
+        'age' => 30,
+        'status' => 'Pending',
+        'time' => '02:00 PM',
+    ]);
+
+    Staff::create([
+        'name' => 'Naveed Akhtar',
+        'email' => 'naveed@hospital.test',
+        'phone' => '03112233445',
+        'designation' => 'Receptionist',
+        'salary' => 35000.00,
+    ]);
+
+    Expense::create([
+        'name' => 'Electricity Bill',
+        'date' => '2026-09-25',
+        'catagory' => 'Utilities',
+        'amount' => 24500.00,
+    ]);
+
+    // Test All Patients PDF
+    $patientsPdf = $this->get(route('reports.patients.pdf'));
+    $patientsPdf->assertOk();
+    expect($patientsPdf->headers->get('content-type'))->toBe('application/pdf');
+
+    // Test Single Patient History PDF
+    $singlePatientPdf = $this->get(route('reports.patient.pdf', $patient->id));
+    $singlePatientPdf->assertOk();
+    expect($singlePatientPdf->headers->get('content-type'))->toBe('application/pdf');
+
+    // Test Appointments Table PDF
+    $appointmentsPdf = $this->get(route('reports.appointments.pdf'));
+    $appointmentsPdf->assertOk();
+    expect($appointmentsPdf->headers->get('content-type'))->toBe('application/pdf');
+
+    // Test Doctors Directory PDF
+    $doctorsPdf = $this->get(route('reports.doctors.pdf'));
+    $doctorsPdf->assertOk();
+    expect($doctorsPdf->headers->get('content-type'))->toBe('application/pdf');
+
+    // Test Staff Directory PDF
+    $staffPdf = $this->get(route('reports.staff.pdf'));
+    $staffPdf->assertOk();
+    expect($staffPdf->headers->get('content-type'))->toBe('application/pdf');
+
+    // Test Expenses Audit PDF
+    $expensesPdf = $this->get(route('reports.expenses.pdf'));
+    $expensesPdf->assertOk();
+    expect($expensesPdf->headers->get('content-type'))->toBe('application/pdf');
+});
+
+test('can cancel appointments by date', function () {
+    $doctor = Doctor::create([
+        'name' => 'Dr. Zafar',
+        'email' => 'zafar@hospital.test',
+        'phone' => '03009998877',
+        'speciality' => 'Cardiologist',
+        'pmdc' => 'PMC-77889-C',
+        'fee' => 3000.00,
+    ]);
+
+    $appointment = Appointment::create([
+        'doctor_id' => $doctor->id,
+        'name' => 'Adnan Sami',
+        'phone' => '03211234567',
+        'gender' => 'Male',
+        'age' => 40,
+        'status' => 'Pending',
+        'time' => '04:00 PM',
+    ]);
+
+    $todayDate = date('Y-m-d');
+
+    $response = $this->post(route('appointments.cancelToday'), [
+        'date' => $todayDate,
+    ]);
+
+    $response->assertRedirect(route('appointment.index'));
+    $response->assertSessionHas('success');
+
+    $appointment->refresh();
+    expect($appointment->status)->toBe('Cancelled');
 });

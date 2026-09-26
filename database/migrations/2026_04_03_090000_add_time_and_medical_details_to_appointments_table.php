@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->string('time')->nullable()->after('age');
-            $table->text('notes')->nullable()->after('status');
-            $table->text('diagnosis')->nullable()->after('notes');
-            $table->text('medicine_suggestions')->nullable()->after('diagnosis');
+            if (! Schema::hasColumn('appointments', 'time')) {
+                $table->string('time')->nullable()->after('age');
+            }
+            if (! Schema::hasColumn('appointments', 'notes')) {
+                $table->text('notes')->nullable();
+            }
+            if (! Schema::hasColumn('appointments', 'diagnosis')) {
+                $table->text('diagnosis')->nullable();
+            }
+            if (! Schema::hasColumn('appointments', 'medicine_suggestions')) {
+                $table->text('medicine_suggestions')->nullable();
+            }
         });
     }
 
@@ -25,7 +33,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('appointments', function (Blueprint $table) {
-            $table->dropColumn(['time', 'notes', 'diagnosis', 'medicine_suggestions']);
+            $columnsToDrop = [];
+            foreach (['time', 'notes', 'diagnosis', 'medicine_suggestions'] as $column) {
+                if (Schema::hasColumn('appointments', $column)) {
+                    $columnsToDrop[] = $column;
+                }
+            }
+            if (! empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };
