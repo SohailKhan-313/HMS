@@ -6,15 +6,15 @@ PORT="${PORT:-80}"
 
 # Adjust Apache listening port dynamically
 if [ "$PORT" != "80" ]; then
-    sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf 2>/dev/null || true
-    sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/*.conf 2>/dev/null || true
+    sed -i "s/Listen [0-9]*/Listen ${PORT}/" /etc/apache2/ports.conf 2>/dev/null || true
+    sed -i "s/<VirtualHost \*:[0-9]*>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/*.conf 2>/dev/null || true
 fi
 
 # Ensure only a single MPM (prefork) is enabled to prevent AH00534 error
 rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
 a2enmod mpm_prefork 2>/dev/null || true
 
-# Ensure .env file exists so artisan commands do not fail
+# Ensure .env file exists
 if [ ! -f /var/www/html/.env ]; then
     if [ -f /var/www/html/.env.example ]; then
         cp /var/www/html/.env.example /var/www/html/.env
@@ -23,7 +23,7 @@ if [ ! -f /var/www/html/.env ]; then
     fi
 fi
 
-# If APP_KEY is provided in environment, write it to .env
+# Write APP_KEY to .env if provided in environment, or generate one
 if [ -n "$APP_KEY" ]; then
     if grep -q "^APP_KEY=" /var/www/html/.env; then
         sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" /var/www/html/.env
@@ -31,11 +31,47 @@ if [ -n "$APP_KEY" ]; then
         echo "APP_KEY=${APP_KEY}" >> /var/www/html/.env
     fi
 else
-    # Check if .env already has an APP_KEY; if not, generate one
-    CURRENT_KEY=$(grep "^APP_KEY=" /var/www/html/.env | cut -d '=' -f2)
+    CURRENT_KEY=$(grep "^APP_KEY=" /var/www/html/.env 2>/dev/null | cut -d '=' -f2)
     if [ -z "$CURRENT_KEY" ]; then
         echo "Generating application encryption key..."
         php artisan key:generate --force || true
+    fi
+fi
+
+# Sync database environment variables to .env so Laravel Dotenv always reads them
+if [ -n "$DB_HOST" ]; then
+    if grep -q "^DB_HOST=" /var/www/html/.env; then
+        sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" /var/www/html/.env
+    else
+        echo "DB_HOST=${DB_HOST}" >> /var/www/html/.env
+    fi
+fi
+if [ -n "$DB_DATABASE" ]; then
+    if grep -q "^DB_DATABASE=" /var/www/html/.env; then
+        sed -i "s|^DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" /var/www/html/.env
+    else
+        echo "DB_DATABASE=${DB_DATABASE}" >> /var/www/html/.env
+    fi
+fi
+if [ -n "$DB_USERNAME" ]; then
+    if grep -q "^DB_USERNAME=" /var/www/html/.env; then
+        sed -i "s|^DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" /var/www/html/.env
+    else
+        echo "DB_USERNAME=${DB_USERNAME}" >> /var/www/html/.env
+    fi
+fi
+if [ -n "$DB_PASSWORD" ]; then
+    if grep -q "^DB_PASSWORD=" /var/www/html/.env; then
+        sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" /var/www/html/.env
+    else
+        echo "DB_PASSWORD=${DB_PASSWORD}" >> /var/www/html/.env
+    fi
+fi
+if [ -n "$DB_PORT" ]; then
+    if grep -q "^DB_PORT=" /var/www/html/.env; then
+        sed -i "s|^DB_PORT=.*|DB_PORT=${DB_PORT}|" /var/www/html/.env
+    else
+        echo "DB_PORT=${DB_PORT}" >> /var/www/html/.env
     fi
 fi
 
@@ -43,10 +79,7 @@ fi
 mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache /var/www/html/.env
 chmod -R 775 storage bootstrap/cache
-chmod 644 /var/www/html/.env
-
-# Pass runtime environment variables to Apache envvars so web requests can access them
-env | grep -E '^(APP_|DB_|LOG_|PORT|SESSION_|CACHE_|AUTO_MIGRATE)' | sed 's/^/export /' >> /etc/apache2/envvars 2>/dev/null || true
+chmod 664 /var/www/html/.env
 
 # Run database migrations safely without crashing the container on connection errors
 if [ "$AUTO_MIGRATE" = "true" ]; then
@@ -58,9 +91,7 @@ if [ "$AUTO_MIGRATE" = "true" ]; then
     fi
 fi
 
-# Cache configurations, routes, and views so Laravel bakes APP_KEY into cache
-php artisan config:cache || true
-php artisan route:cache || true
+# Optimize views
 php artisan view:cache || true
 
 echo "Starting Apache web server on port ${PORT}..."
