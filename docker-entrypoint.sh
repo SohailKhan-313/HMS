@@ -14,7 +14,7 @@ fi
 rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
 a2enmod mpm_prefork 2>/dev/null || true
 
-# Ensure .env file exists so artisan commands (like key:generate) do not fail
+# Ensure .env file exists so artisan commands do not fail
 if [ ! -f /var/www/html/.env ]; then
     if [ -f /var/www/html/.env.example ]; then
         cp /var/www/html/.env.example /var/www/html/.env
@@ -23,16 +23,30 @@ if [ ! -f /var/www/html/.env ]; then
     fi
 fi
 
-# Ensure storage & bootstrap/cache directories exist with proper permissions
-mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-
-# If APP_KEY is empty, generate an application key safely
-if [ -z "$APP_KEY" ]; then
-    echo "Generating application encryption key..."
-    php artisan key:generate --force || true
+# If APP_KEY is provided in environment, write it to .env
+if [ -n "$APP_KEY" ]; then
+    if grep -q "^APP_KEY=" /var/www/html/.env; then
+        sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" /var/www/html/.env
+    else
+        echo "APP_KEY=${APP_KEY}" >> /var/www/html/.env
+    fi
+else
+    # Check if .env already has an APP_KEY; if not, generate one
+    CURRENT_KEY=$(grep "^APP_KEY=" /var/www/html/.env | cut -d '=' -f2)
+    if [ -z "$CURRENT_KEY" ]; then
+        echo "Generating application encryption key..."
+        php artisan key:generate --force || true
+    fi
 fi
+
+# Ensure storage & bootstrap/cache directories and .env have proper permissions
+mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache /var/www/html/.env
+chmod -R 775 storage bootstrap/cache
+chmod 644 /var/www/html/.env
+
+# Pass runtime environment variables to Apache envvars so web requests can access them
+env | grep -E '^(APP_|DB_|LOG_|PORT|SESSION_|CACHE_|AUTO_MIGRATE)' | sed 's/^/export /' >> /etc/apache2/envvars 2>/dev/null || true
 
 # Run database migrations safely without crashing the container on connection errors
 if [ "$AUTO_MIGRATE" = "true" ]; then
@@ -44,7 +58,9 @@ if [ "$AUTO_MIGRATE" = "true" ]; then
     fi
 fi
 
-# Optimize views for production
+# Cache configurations, routes, and views so Laravel bakes APP_KEY into cache
+php artisan config:cache || true
+php artisan route:cache || true
 php artisan view:cache || true
 
 echo "Starting Apache web server on port ${PORT}..."
