@@ -331,6 +331,8 @@
     }
   </script>
 
+  @include('partials.chatbot')
+
   @stack('scripts')
 
 </body>

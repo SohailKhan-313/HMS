@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AppointmentPrintController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\ExpenseCatagoryController;
@@ -103,3 +104,6 @@ Route::prefix('reports')->name('reports.')->group(function () {
     Route::get('/staff/pdf', [ReportController::class, 'staffPdf'])->name('staff.pdf');
     Route::get('/expenses/pdf', [ReportController::class, 'expensesPdf'])->name('expenses.pdf');
 });
+
+// AI Medical Assistant & Hospital Chatbot
+Route::post('/chatbot/message', [ChatbotController::class, 'handle'])->name('chatbot.message');

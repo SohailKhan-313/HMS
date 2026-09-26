@@ -314,3 +314,43 @@ test('can cancel appointments by date', function () {
     $appointment->refresh();
     expect($appointment->status)->toBe('Cancelled');
 });
+
+test('chatbot provides hospital records information and medical triage suggestions', function () {
+    $doctor = Doctor::create([
+        'name' => 'Dr. Tariq Dent',
+        'email' => 'tariq@hospital.test',
+        'phone' => '03001112233',
+        'speciality' => 'Dentist',
+        'pmdc' => 'PMC-1122-D',
+        'fee' => 1500.00,
+    ]);
+
+    // Test greeting
+    $greetingRes = $this->postJson(route('chatbot.message'), [
+        'message' => 'Hello hospital',
+    ]);
+    $greetingRes->assertOk();
+    $greetingRes->assertJsonStructure(['status', 'reply', 'suggestions']);
+    expect($greetingRes->json('status'))->toBe('success');
+
+    // Test doctor record inquiry
+    $doctorRes = $this->postJson(route('chatbot.message'), [
+        'message' => 'Show me the doctors available',
+    ]);
+    $doctorRes->assertOk();
+    expect($doctorRes->json('reply'))->toContain('Dr. Tariq Dent');
+
+    // Test medical triage suggestion
+    $symptomRes = $this->postJson(route('chatbot.message'), [
+        'message' => 'I have severe toothache and bleeding gums, what should I do?',
+    ]);
+    $symptomRes->assertOk();
+    expect($symptomRes->json('reply'))->toContain('Dental Surgery');
+    expect($symptomRes->json('reply'))->toContain('Dr. Tariq Dent');
+
+    // Test validation failure
+    $emptyRes = $this->postJson(route('chatbot.message'), [
+        'message' => '',
+    ]);
+    $emptyRes->assertStatus(422);
+});

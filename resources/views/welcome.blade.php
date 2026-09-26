@@ -18,6 +18,9 @@
                     <p class="mb-0 text-muted font-13">Real-time overview of patients, daily appointments, medical roster, and clinical finances.</p>
                 </div>
                 <div class="d-flex align-items-center flex-wrap gap-2">
+                    <button type="button" class="btn btn-dark btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="document.getElementById('hms-chatbot-launcher').click()">
+                        <i class="bi bi-robot text-info"></i> AI Assistant
+                    </button>
                     <a href="{{ route('appointment.index') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
                         <i class="bi bi-calendar-plus"></i> Appointments
                     </a>
@@ -132,6 +135,39 @@
                     <a href="{{ route('staff.index') }}" class="font-12 text-success fw-semibold text-decoration-none">
                         View Staff Directory <i class="bi bi-arrow-right"></i>
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Medical Assistant Quick Console on Dashboard -->
+    <div class="card border-0 shadow-sm radius-10 mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <div class="card-body p-3 p-md-4 text-white">
+            <div class="row align-items-center g-3">
+                <div class="col-12 col-lg-7">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1 rounded-pill font-11">
+                            <i class="bi bi-cpu me-1"></i> HMS Intelligence
+                        </span>
+                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 rounded-pill font-11">
+                            <i class="bi bi-check-circle me-1"></i> Live Records &amp; Medical Triage
+                        </span>
+                    </div>
+                    <h5 class="fw-bold mb-1 text-white">AI Hospital Assistant &amp; Medical Suggestions</h5>
+                    <p class="text-white-50 font-13 mb-0">Ask about available doctors, consultation fees, patient dues, or describe symptoms for preliminary triage and doctor recommendations.</p>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill font-12" onclick="openChatWithPrompt('Show available doctors and consultation fees')">
+                            👨‍⚕️ Available Doctors
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill font-12" onclick="openChatWithPrompt('What are today appointments?')">
+                            📅 Today's Schedule
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm rounded-pill font-12 fw-semibold shadow-sm" onclick="document.getElementById('hms-chatbot-launcher').click()">
+                            <i class="bi bi-chat-dots-fill me-1"></i> Open AI Assistant
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
