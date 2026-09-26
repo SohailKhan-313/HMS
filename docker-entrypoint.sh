@@ -4,11 +4,9 @@ set -e
 # Support dynamic port binding on cloud platforms (Render, Railway, Fly.io)
 PORT="${PORT:-80}"
 
-# Adjust Apache listening port dynamically
-if [ "$PORT" != "80" ]; then
-    sed -i "s/Listen [0-9]*/Listen ${PORT}/" /etc/apache2/ports.conf 2>/dev/null || true
-    sed -i "s/<VirtualHost \*:[0-9]*>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/*.conf 2>/dev/null || true
-fi
+# Cleanly set Apache to listen ONLY on the assigned PORT (prevents duplicate port binding errors)
+echo "Listen ${PORT}" > /etc/apache2/ports.conf
+sed -i "s/<VirtualHost \*:[0-9]*>/<VirtualHost \*:${PORT}>/" /etc/apache2/sites-available/000-default.conf 2>/dev/null || true
 
 # Ensure only a single MPM (prefork) is enabled to prevent AH00534 error
 rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
