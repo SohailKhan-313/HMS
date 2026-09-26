@@ -70,8 +70,8 @@
                     <label class="form-label font-12 fw-semibold text-secondary mb-1">Category</label>
                     <select name="category" class="form-select form-select-sm">
                         <option value="all" {{ $selectedCategory === 'all' ? 'selected' : '' }}>All Categories</option>
-                        @foreach($categories as $catKey => $catLabel)
-                            <option value="{{ $catKey }}" {{ $selectedCategory === $catKey ? 'selected' : '' }}>{{ $catLabel }}</option>
+                        @foreach($expenseCategories as $cat)
+                            <option value="{{ $cat->name }}" {{ $selectedCategory === $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -136,14 +136,22 @@
                                 </span>
                                 <span class="{{ $labSales > 0 ? 'fw-bold text-warning-emphasis' : 'text-muted' }}">Rs. {{ number_format($labSales, 0) }}</span>
                             </li>
-                            @if($additionalSales > 0)
+                            @if($emergencySales > 0)
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
-                                    <i class="bi bi-hospital text-danger font-12"></i> Emergency &amp; Other
+                                    <i class="bi bi-hospital text-danger font-12"></i> Emergency Care
                                 </span>
-                                <span class="fw-bold text-danger">Rs. {{ number_format($additionalSales, 0) }}</span>
+                                <span class="fw-bold text-danger">Rs. {{ number_format($emergencySales, 0) }}</span>
                             </li>
                             @endif
+                            @foreach($customCategorySales as $cName => $cTotal)
+                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                <span class="text-secondary d-flex align-items-center gap-1">
+                                    <i class="bi bi-tag-fill text-primary font-12"></i> {{ $cName }}
+                                </span>
+                                <span class="fw-bold text-dark">Rs. {{ number_format($cTotal, 0) }}</span>
+                            </li>
+                            @endforeach
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-tag-fill text-danger font-12"></i> Total Discounts Given
@@ -160,30 +168,46 @@
 
                 <!-- Block 2: Hospital Revenue & Net Profit -->
                 <div class="col-12 col-lg-4">
-                    <div class="h-100 p-3 rounded-3 border" style="background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-uppercase font-12 fw-bold text-primary">Hospital Net Revenue</span>
-                            <span class="badge bg-primary bg-opacity-10 text-primary"><i class="bi bi-graph-up-arrow"></i> Net Profit</span>
+                    <div class="h-100 p-3 rounded-3 border d-flex flex-column justify-content-between" style="background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-uppercase font-12 fw-bold text-primary">Hospital Net Revenue</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary"><i class="bi bi-graph-up-arrow"></i> Net Profit</span>
+                            </div>
+                            <h3 class="fw-bold text-primary mb-3">Rs. {{ number_format($netRevenue, 0) }}</h3>
+                            <ul class="list-unstyled mb-2 font-13">
+                                <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                    <span class="text-secondary">Gross Service Collections</span>
+                                    <span class="fw-bold text-dark">Rs. {{ number_format($totalSales, 0) }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                    <span class="text-secondary d-flex align-items-center gap-1">
+                                        <i class="bi bi-arrow-down-right text-danger font-12"></i> Daily Operational Expenses
+                                    </span>
+                                    <span class="text-danger fw-semibold">- Rs. {{ number_format($dailyExpenses, 0) }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
+                                    <span class="text-secondary">Monthly Staff Payroll Liability</span>
+                                    <span class="text-muted">Rs. {{ number_format($staffPayroll, 0) }}</span>
+                                </li>
+                                <li class="d-flex justify-content-between pt-2 fw-bold">
+                                    <span class="text-dark">Operating Balance</span>
+                                    <span class="{{ $netRevenue > 0 ? 'text-primary fs-6' : 'text-danger fs-6' }}">Rs. {{ number_format($netRevenue, 0) }}</span>
+                                </li>
+                            </ul>
                         </div>
-                        <h3 class="fw-bold text-primary mb-3">Rs. {{ number_format($netRevenue, 0) }}</h3>
-                        <ul class="list-unstyled mb-0 font-13">
-                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
-                                <span class="text-secondary">Gross Service Collections</span>
-                                <span class="fw-bold text-dark">Rs. {{ number_format($totalSales, 0) }}</span>
-                            </li>
-                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
-                                <span class="text-secondary">Daily Operational Expenses</span>
-                                <span class="text-danger fw-semibold">- Rs. {{ number_format($dailyExpenses, 0) }}</span>
-                            </li>
-                            <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
-                                <span class="text-secondary">Monthly Staff Payroll Liability</span>
-                                <span class="text-muted">Rs. {{ number_format($staffPayroll, 0) }}</span>
-                            </li>
-                            <li class="d-flex justify-content-between pt-2 fw-bold">
-                                <span class="text-dark">Operating Balance</span>
-                                <span class="{{ $netRevenue > 0 ? 'text-primary fs-6' : 'text-danger fs-6' }}">Rs. {{ number_format($netRevenue, 0) }}</span>
-                            </li>
-                        </ul>
+                        @if($expenseCategoryBreakdown->isNotEmpty())
+                        <div class="mt-2 pt-2 border-top border-light-subtle font-12">
+                            <span class="text-muted fw-semibold d-block mb-1 font-11 text-uppercase">Expenses by Category:</span>
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach($expenseCategoryBreakdown as $expCat => $expData)
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 font-11">
+                                        {{ $expCat }}: Rs. {{ number_format($expData['total'], 0) }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
@@ -263,8 +287,17 @@
                             <span class="badge bg-secondary rounded-pill">{{ $appointments->total() }}</span>
                         </button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold d-flex align-items-center gap-2" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses-pane" type="button" role="tab" aria-controls="expenses-pane" aria-selected="false">
+                            <i class="bi bi-cash-stack text-danger"></i> Daily Operational Expenses
+                            <span class="badge bg-danger rounded-pill">{{ $expenses->total() }}</span>
+                        </button>
+                    </li>
                 </ul>
                 <div class="d-flex gap-2 mb-2">
+                    <a href="{{ route('expenses.index') }}" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
+                        <i class="bi bi-box-arrow-up-right"></i> Expenses Manager
+                    </a>
                     <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
                         <i class="bi bi-plus-lg"></i> Add Payment
                     </button>
@@ -519,6 +552,100 @@
                     </div>
                 @endif
             </div>
+
+            <!-- TAB 3: DAILY OPERATIONAL EXPENSES -->
+            <div class="tab-pane fade" id="expenses-pane" role="tabpanel" aria-labelledby="expenses-tab" tabindex="0">
+                <!-- Top banner in expense tab -->
+                <div class="d-flex align-items-center justify-content-between p-3 bg-light border-bottom flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger text-white p-2 rounded-circle"><i class="bi bi-cash-stack"></i></span>
+                        <div>
+                            <h6 class="mb-0 fw-bold text-dark">Daily Hospital Expenditures &amp; Operational Costs</h6>
+                            <small class="text-muted">Showing {{ $expenses->total() }} records | Total: <strong class="text-danger">Rs. {{ number_format($dailyExpenses, 2) }}</strong></small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('expenses.index') }}" class="btn btn-danger btn-sm px-3 shadow-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Add / Record Daily Expense
+                        </a>
+                        <a href="{{ route('reports.expenses.pdf') }}" target="_blank" class="btn btn-outline-secondary btn-sm shadow-sm">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Expenses PDF
+                        </a>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light font-13 text-secondary">
+                            <tr>
+                                <th class="ps-3">Expense ID</th>
+                                <th>Date</th>
+                                <th>Expense Description / Title</th>
+                                <th>Category</th>
+                                <th class="text-end">Amount (Rs.)</th>
+                                <th>Recorded</th>
+                                <th class="text-end pe-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($expenses as $exp)
+                                <tr>
+                                    <td class="ps-3">
+                                        <span class="badge bg-light text-dark border px-2 py-1 font-12 fw-bold font-monospace">
+                                            #EXP-{{ str_pad($exp->id, 5, '0', STR_PAD_LEFT) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="font-13 fw-semibold text-dark">
+                                            {{ $exp->date ? \Carbon\Carbon::parse($exp->date)->format('d M Y') : '-' }}
+                                        </div>
+                                        <small class="text-muted font-11">{{ $exp->date ? \Carbon\Carbon::parse($exp->date)->format('l') : '' }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark font-14">{{ $exp->name }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 font-12 rounded-pill">
+                                            <i class="bi bi-tag-fill me-1"></i> {{ $exp->catagory }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-danger font-monospace fs-6">
+                                        Rs. {{ number_format((float) $exp->amount, 2) }}
+                                    </td>
+                                    <td class="font-12 text-muted">
+                                        {{ $exp->created_at ? $exp->created_at->diffForHumans() : '-' }}
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a href="{{ route('expenses.index') }}" class="btn btn-outline-secondary btn-sm px-2 py-1 font-11" title="Manage in Expenses">
+                                            <i class="bi bi-box-arrow-up-right me-1"></i> View in Expenses
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <i class="bi bi-wallet-x fs-2 d-block mb-2 text-danger opacity-50"></i>
+                                        No operational expense records found for the selected dates.
+                                        <div class="mt-2">
+                                            <a href="{{ route('expenses.index') }}" class="btn btn-danger btn-sm px-3">
+                                                <i class="bi bi-plus-circle me-1"></i> Record New Expense
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                @if($expenses->hasPages())
+                    <div class="card-footer bg-transparent py-3 border-top">
+                        <div class="d-flex justify-content-center">
+                            {{ $expenses->links() }}
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -543,11 +670,14 @@
                         <div class="col-12 col-md-6">
                             <label class="form-label font-13 fw-semibold">Payment Category <span class="text-danger">*</span></label>
                             <select name="category" id="modal_category" class="form-select" required>
-                                <option value="" disabled selected>-- Select Clinical Category --</option>
-                                @foreach($categories as $key => $label)
-                                    <option value="{{ $key }}" {{ old('category') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                                <option value="" disabled {{ old('category') ? '' : 'selected' }}>-- Select Category from DB --</option>
+                                @foreach($expenseCategories as $cat)
+                                    <option value="{{ $cat->name }}" {{ old('category') === $cat->name ? 'selected' : '' }}>
+                                        {{ $cat->name }} @if(!empty($cat->description)) ({{ Str::limit($cat->description, 35) }}) @endif
+                                    </option>
                                 @endforeach
                             </select>
+                            <small class="text-muted font-11">Loaded from database categories (<a href="{{ route('category.index') }}" target="_blank" class="text-decoration-underline">Manage Categories</a>)</small>
                         </div>
 
                         <!-- Link with Registered Patient (optional) -->

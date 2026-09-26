@@ -6,6 +6,7 @@ use App\Http\Requests\StoreHospitalPaymentRequest;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Expense;
+use App\Models\ExpenseCatagory;
 use App\Models\HospitalPayment;
 use App\Models\PatientHistory;
 use App\Models\Staff;
@@ -81,7 +82,51 @@ class HospitalPaymentController extends Controller
         $appointments = $appointmentsQuery->paginate(15, ['*'], 'appointments_page')->withQueryString();
         $allAppointments = (clone $appointmentsQuery)->get();
 
-        // Calculate Category Breakdown totals (for active date range)
+        // 3. Query for Daily Expenses stream (paginated for ledger tab)
+        $expensesQuery = Expense::query()->latest('date')->latest('id');
+        if ($startDate && $endDate) {
+            $expensesQuery->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $expensesQuery->whereDate('date', '>=', $startDate);
+        } elseif ($endDate) {
+            $expensesQuery->whereDate('date', '<=', $endDate);
+        }
+
+        if ($selectedCategory && $selectedCategory !== 'all') {
+            $expensesQuery->where('catagory', $selectedCategory);
+        }
+
+        if ($search) {
+            $expensesQuery->where(function ($q) use ($search): void {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('catagory', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
+            });
+        }
+
+        $expenses = $expensesQuery->paginate(15, ['*'], 'expenses_page')->withQueryString();
+
+        // All expenses in date range (unfiltered by search/pagination for summary metrics)
+        $allExpensesQuery = Expense::query();
+        if ($startDate && $endDate) {
+            $allExpensesQuery->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $allExpensesQuery->whereDate('date', '>=', $startDate);
+        } elseif ($endDate) {
+            $allExpensesQuery->whereDate('date', '<=', $endDate);
+        }
+        $allExpensesInRange = $allExpensesQuery->get();
+        $dailyExpenses = (float) $allExpensesInRange->sum('amount');
+
+        // Dynamic breakdown of daily expenses by category
+        $expenseCategoryBreakdown = $allExpensesInRange->groupBy('catagory')->map(function ($group): array {
+            return [
+                'count' => $group->count(),
+                'total' => (float) $group->sum('amount'),
+            ];
+        });
+
+        // 4. Calculate Category Breakdown totals for payments (for active date range)
         $paymentTotalsQuery = HospitalPayment::query();
         if ($startDate && $endDate) {
             $paymentTotalsQuery->whereBetween('payment_date', [$startDate, $endDate]);
@@ -93,6 +138,16 @@ class HospitalPaymentController extends Controller
 
         $allPaymentsInRange = (clone $paymentTotalsQuery)->get();
 
+        // Dynamic breakdown of custom payments by category
+        $paymentCategoryBreakdown = $allPaymentsInRange->groupBy('category')->map(function ($group): array {
+            return [
+                'count' => $group->count(),
+                'total' => (float) $group->sum('net_amount'),
+                'gross' => (float) $group->sum('amount'),
+                'discount' => (float) $group->sum('discount'),
+            ];
+        });
+
         // 1. Consultation Billing (Appointments consultation fees + custom consultation payments)
         $appointmentConsultationFee = (float) $allAppointments->sum(function ($apt): float {
             return $apt->doctor ? (float) $apt->doctor->fee : 0.0;
@@ -101,35 +156,41 @@ class HospitalPaymentController extends Controller
         $consultationSales = $appointmentConsultationFee + $customConsultationSales;
 
         // 2. Pharmacy / Medicines
-        $medicineSales = (float) $allPaymentsInRange->where('category', 'Pharmacy / Medicine')->sum('net_amount');
+        $medicineSales = (float) $allPaymentsInRange->filter(fn ($p) => str_contains(strtolower($p->category), 'pharmacy') || str_contains(strtolower($p->category), 'medicine'))->sum('net_amount');
 
         // 3. General Procedures
-        $procedureSales = (float) $allPaymentsInRange->where('category', 'General Procedures')->sum('net_amount');
+        $procedureSales = (float) $allPaymentsInRange->filter(fn ($p) => str_contains(strtolower($p->category), 'procedure'))->sum('net_amount');
 
         // 4. Diagnostics / Lab
-        $labSales = (float) $allPaymentsInRange->where('category', 'Diagnostics / Lab')->sum('net_amount');
+        $labSales = (float) $allPaymentsInRange->filter(fn ($p) => str_contains(strtolower($p->category), 'lab') || str_contains(strtolower($p->category), 'diagnostic'))->sum('net_amount');
 
-        // 5. Emergency & Other
-        $emergencySales = (float) $allPaymentsInRange->where('category', 'Emergency')->sum('net_amount');
-        $otherSales = (float) $allPaymentsInRange->where('category', 'Other')->sum('net_amount');
+        // 5. Emergency
+        $emergencySales = (float) $allPaymentsInRange->filter(fn ($p) => str_contains(strtolower($p->category), 'emergency'))->sum('net_amount');
+
+        // 6. Custom / other categories dynamically aggregated
+        $standardCategoryKeywords = ['consultation', 'pharmacy', 'medicine', 'procedure', 'lab', 'diagnostic', 'emergency'];
+        $customCategorySales = [];
+        foreach ($paymentCategoryBreakdown as $catName => $data) {
+            $isStandard = false;
+            foreach ($standardCategoryKeywords as $kw) {
+                if (str_contains(strtolower($catName), $kw)) {
+                    $isStandard = true;
+                    break;
+                }
+            }
+            if (! $isStandard) {
+                $customCategorySales[$catName] = $data['total'];
+            }
+        }
+        $otherSales = (float) array_sum($customCategorySales);
         $additionalSales = $emergencySales + $otherSales;
 
-        // 6. Discounts Applied
+        // Discounts Applied
         $totalDiscount = (float) $allPaymentsInRange->sum('discount');
 
-        // Gross Total Sales
-        $totalSales = $consultationSales + $medicineSales + $procedureSales + $labSales + $additionalSales;
+        // Gross Total Sales (All services billing + consultations)
+        $totalSales = $appointmentConsultationFee + (float) $allPaymentsInRange->sum('net_amount');
 
-        // Daily expenses in range
-        $expenseQuery = Expense::query();
-        if ($startDate && $endDate) {
-            $expenseQuery->whereBetween('date', [$startDate, $endDate]);
-        } elseif ($startDate) {
-            $expenseQuery->whereDate('date', '>=', $startDate);
-        } elseif ($endDate) {
-            $expenseQuery->whereDate('date', '<=', $endDate);
-        }
-        $dailyExpenses = (float) $expenseQuery->sum('amount');
         $staffPayroll = (float) Staff::sum('salary');
 
         // Net hospital revenue (Total sales minus operational expenses)
@@ -141,6 +202,7 @@ class HospitalPaymentController extends Controller
         $totalWalletAmount = (float) PatientHistory::sum('wallet_amount');
         $totalAppointments = $allAppointments->count();
         $totalCustomPayments = $allPaymentsInRange->count();
+        $totalDailyExpensesCount = $allExpensesInRange->count();
 
         // Averages and rates
         $totalTransactions = $totalAppointments + $totalCustomPayments;
@@ -149,15 +211,22 @@ class HospitalPaymentController extends Controller
             ? round(($totalSales / ($totalSales + $totalDueAmount)) * 100, 1)
             : 100.0;
 
+        // Categories from Database table expense_catagory
+        $expenseCategories = ExpenseCatagory::query()->orderBy('name')->get();
+
         // Data for Add Payment Modal
         $doctors = Doctor::orderBy('name')->get();
         $patients = PatientHistory::orderBy('name')->get();
-        $categories = HospitalPayment::CATEGORIES;
         $paymentMethods = HospitalPayment::PAYMENT_METHODS;
 
         return view('hospital-payments', compact(
             'payments',
             'appointments',
+            'expenses',
+            'expenseCategories',
+            'expenseCategoryBreakdown',
+            'paymentCategoryBreakdown',
+            'customCategorySales',
             'consultationSales',
             'appointmentConsultationFee',
             'customConsultationSales',
@@ -177,6 +246,7 @@ class HospitalPaymentController extends Controller
             'totalWalletAmount',
             'totalAppointments',
             'totalCustomPayments',
+            'totalDailyExpensesCount',
             'avgFeePerVisit',
             'collectionRate',
             'startDate',
@@ -186,7 +256,6 @@ class HospitalPaymentController extends Controller
             'search',
             'doctors',
             'patients',
-            'categories',
             'paymentMethods'
         ));
     }

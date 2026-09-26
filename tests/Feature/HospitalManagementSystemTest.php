@@ -3,6 +3,7 @@
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Expense;
+use App\Models\ExpenseCatagory;
 use App\Models\HospitalPayment;
 use App\Models\PatientHistory;
 use App\Models\Staff;
@@ -450,5 +451,53 @@ test('can delete a hospital payment record', function () {
 
     $this->assertDatabaseMissing('hospital_payments', [
         'id' => $payment->id,
+    ]);
+});
+
+test('hospital payments page dynamically displays expense categories from db and daily expenses records', function () {
+    // 1. Create a custom category in expense_catagory table
+    $customCat = ExpenseCatagory::create([
+        'name' => 'Dialysis Unit Supplies',
+        'description' => 'Hemodialysis disposable kits and filters',
+    ]);
+
+    // 2. Create daily expense records in expenses table
+    $expense = Expense::create([
+        'name' => 'Dialysis Filter Cartridges',
+        'date' => now()->toDateString(),
+        'catagory' => 'Dialysis Unit Supplies',
+        'amount' => 8500.00,
+    ]);
+
+    // 3. Request hospital payments page
+    $response = $this->get(route('hospital-payments'));
+
+    $response->assertOk();
+    // Dropdown contains the category from expense_catagory table
+    $response->assertSee('Dialysis Unit Supplies');
+    // Daily expenses tab shows the expense record
+    $response->assertSee('Dialysis Filter Cartridges');
+    $response->assertSee('8,500');
+    $response->assertSee('Daily Operational Expenses');
+
+    // 4. Test storing payment with this custom category from expense_catagory DB table
+    $paymentRes = $this->post(route('hospital-payments.store'), [
+        'category' => 'Dialysis Unit Supplies',
+        'patient_name' => 'Kareem Ullah',
+        'patient_phone' => '03451122334',
+        'amount' => 12000.00,
+        'discount' => 500.00,
+        'paid_amount' => 11500.00,
+        'payment_method' => 'Cash',
+        'payment_date' => now()->toDateString(),
+        'status' => 'Paid',
+        'notes' => 'Dialysis session #3',
+    ]);
+
+    $paymentRes->assertRedirect(route('hospital-payments'));
+    $this->assertDatabaseHas('hospital_payments', [
+        'category' => 'Dialysis Unit Supplies',
+        'patient_name' => 'Kareem Ullah',
+        'net_amount' => 11500.00,
     ]);
 });

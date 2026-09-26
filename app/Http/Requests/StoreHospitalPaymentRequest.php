@@ -22,7 +22,7 @@ class StoreHospitalPaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category' => ['required', 'string', 'in:Consultation,Pharmacy / Medicine,General Procedures,Diagnostics / Lab,Emergency,Other'],
+            'category' => ['required', 'string', 'max:255'],
             'patient_id' => ['nullable', 'integer', 'exists:patienthistory,id'],
             'patient_name' => ['required', 'string', 'max:255'],
             'patient_phone' => ['nullable', 'string', 'max:50'],
@@ -45,8 +45,7 @@ class StoreHospitalPaymentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'category.required' => 'Please select a valid payment category.',
-            'category.in' => 'Selected category is not recognized.',
+            'category.required' => 'Please select a valid payment category from the list.',
             'patient_name.required' => 'Patient name is required.',
             'amount.required' => 'Payment amount is required.',
             'amount.min' => 'Payment amount must be greater than zero.',
