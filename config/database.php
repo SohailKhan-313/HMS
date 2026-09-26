@@ -16,7 +16,15 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => (function () {
+        $conn = env('DB_CONNECTION', 'sqlite');
+        $host = env('DB_HOST');
+        if ($conn === 'mysql' && (empty($host) || str_contains((string) $host, '<') || str_contains((string) $host, 'your_db_host'))) {
+            return 'sqlite';
+        }
+
+        return $conn;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +42,14 @@ return [
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),
-            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'database' => (function () {
+                $db = env('DB_DATABASE');
+                if (empty($db) || $db === 'laravel' || $db === 'hms' || str_contains((string) $db, '<')) {
+                    return database_path('database.sqlite');
+                }
+
+                return $db;
+            })(),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
             'busy_timeout' => null,
