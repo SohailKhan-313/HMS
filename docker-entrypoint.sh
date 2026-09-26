@@ -51,9 +51,16 @@ if [ -z "$CURRENT_KEY" ]; then
     php artisan key:generate --force || true
 fi
 
-# Run database migrations to ensure all tables exist
+# Run database migrations with retry to allow MySQL service startup time
 echo "Running database migrations..."
-php artisan migrate --force || echo "[Warning] Database migration failed or skipped. Continuing startup..."
+for attempt in 1 2 3 4 5 6; do
+    if php artisan migrate --force; then
+        echo "[Success] Database migrations completed."
+        break
+    fi
+    echo "[Attempt $attempt/6] MySQL not ready yet or migrating failed. Retrying in 3 seconds..."
+    sleep 3
+done
 
 # Cache views for performance
 php artisan view:cache || true

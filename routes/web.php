@@ -111,3 +111,40 @@ Route::prefix('reports')->name('reports.')->group(function () {
 
 // AI Medical Assistant & Hospital Chatbot
 Route::post('/chatbot/message', [ChatbotController::class, 'handle'])->name('chatbot.message');
+
+// Live Production Database Diagnostics and Migration Trigger
+Route::get('/db-status', function () {
+    $default = config('database.default');
+    $config = config("database.connections.{$default}", []);
+
+    $result = [
+        'default_connection' => $default,
+        'driver' => $config['driver'] ?? null,
+        'host' => $config['host'] ?? null,
+        'port' => $config['port'] ?? null,
+        'database' => $config['database'] ?? null,
+        'username' => $config['username'] ?? null,
+        'env_DB_HOST' => env('DB_HOST'),
+        'env_MYSQLHOST' => env('MYSQLHOST'),
+        'env_MYSQL_URL' => env('MYSQL_URL') ? 'PRESENT' : 'NOT_SET',
+    ];
+
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $result['connection_status'] = 'CONNECTED';
+        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+        $result['tables_count'] = count($tables);
+        $result['tables'] = $tables;
+
+        if (count($tables) === 0 || request()->query('migrate') === '1') {
+            \Illuminate\Support\Facades\Artisan::call('migrate --force');
+            $result['migrate_output'] = \Illuminate\Support\Facades\Artisan::output();
+            $result['tables_after_migrate'] = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+            $result['tables_count_after_migrate'] = count($result['tables_after_migrate']);
+        }
+    } catch (\Throwable $e) {
+        $result['connection_status'] = 'FAILED: '.$e->getMessage();
+    }
+
+    return response()->json($result, 200, [], JSON_PRETTY_PRINT);
+})->name('db.status');
