@@ -39,14 +39,18 @@ RUN install-php-extensions \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Configure Apache DocumentRoot to Laravel's /public folder
+# Configure Apache: ensure only mpm_prefork is loaded and mod_rewrite is enabled
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
-    && a2enmod rewrite
+    && a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork rewrite
 
 # Copy codebase
 COPY . .
+
+# Ensure default .env exists from example template
+RUN cp .env.example .env
 
 # Copy compiled frontend assets from Vite build stage
 COPY --from=frontend /app/public/build ./public/build
@@ -60,7 +64,7 @@ RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/fra
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Copy entrypoint script and make executable
+# Copy entrypoint script and ensure executable with unix line endings
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
     && sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh
