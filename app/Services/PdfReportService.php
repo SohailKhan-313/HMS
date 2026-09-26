@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Expense;
+use App\Models\HospitalPayment;
 use App\Models\PatientHistory;
 use App\Models\Staff;
 use Carbon\Carbon;
@@ -474,84 +475,130 @@ class PdfReportService
      */
     public function exportPaymentsPdf(?string $startDate = null, ?string $endDate = null): Response
     {
-        $query = Appointment::with('doctor')->latest();
+        $paymentsQuery = HospitalPayment::with(['doctor', 'patient'])->latest('payment_date');
         if ($startDate && $endDate) {
-            $query->whereBetween('created_at', [
+            $paymentsQuery->whereBetween('payment_date', [$startDate, $endDate]);
+        }
+        $payments = $paymentsQuery->get();
+
+        $aptQuery = Appointment::with('doctor')->latest();
+        if ($startDate && $endDate) {
+            $aptQuery->whereBetween('created_at', [
                 Carbon::parse($startDate)->startOfDay(),
                 Carbon::parse($endDate)->endOfDay(),
             ]);
         }
-        $appointments = $query->get();
+        $appointments = $aptQuery->get();
 
-        $totalConsultation = (float) $appointments->sum(fn ($apt): float => $apt->doctor ? (float) $apt->doctor->fee : 0.0);
+        $aptConsultation = (float) $appointments->sum(fn ($apt): float => $apt->doctor ? (float) $apt->doctor->fee : 0.0);
+        $customConsultation = (float) $payments->where('category', 'Consultation')->sum('net_amount');
+        $consultationSales = $aptConsultation + $customConsultation;
+        $pharmacySales = (float) $payments->where('category', 'Pharmacy / Medicine')->sum('net_amount');
+        $procedureSales = (float) $payments->where('category', 'General Procedures')->sum('net_amount');
+        $labSales = (float) $payments->where('category', 'Diagnostics / Lab')->sum('net_amount');
+        $otherSales = (float) $payments->whereIn('category', ['Emergency', 'Other'])->sum('net_amount');
+        $totalSales = $consultationSales + $pharmacySales + $procedureSales + $labSales + $otherSales;
+
         $totalExpenses = (float) Expense::sum('amount');
         $totalDues = (float) PatientHistory::sum('due_amount');
-        $netRevenue = max(0.0, $totalConsultation - $totalExpenses);
+        $netRevenue = max(0.0, $totalSales - $totalExpenses);
 
         $pdf = new HospitalPdfDocument('P', 'mm', 'A4');
         $pdf->reportTitle = 'Hospital Payments & Financial Statement';
         $pdf->subTitle = ($startDate && $endDate)
             ? 'Period: '.Carbon::parse($startDate)->format('d M Y').' to '.Carbon::parse($endDate)->format('d M Y')
-            : 'All Recorded Transactions & Appointments';
+            : 'All Recorded Clinical Billings & Services';
         $pdf->AliasNbPages();
         $pdf->AddPage();
 
         // Financial Overview Cards
-        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFont('Arial', 'B', 8);
         $pdf->SetFillColor(241, 245, 249);
         $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(47, 8, 'TOTAL SALES', 1, 0, 'C', true);
-        $pdf->Cell(47, 8, 'DAILY EXPENSES', 1, 0, 'C', true);
-        $pdf->Cell(47, 8, 'NET REVENUE', 1, 0, 'C', true);
-        $pdf->Cell(49, 8, 'PATIENT DUES', 1, 1, 'C', true);
+        $pdf->Cell(47, 7, 'TOTAL SALES', 1, 0, 'C', true);
+        $pdf->Cell(47, 7, 'DAILY EXPENSES', 1, 0, 'C', true);
+        $pdf->Cell(47, 7, 'NET REVENUE', 1, 0, 'C', true);
+        $pdf->Cell(49, 7, 'PATIENT DUES', 1, 1, 'C', true);
 
-        $pdf->SetFont('Arial', 'B', 10);
+        $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(37, 99, 235);
-        $pdf->Cell(47, 8, 'Rs. '.number_format($totalConsultation, 2), 1, 0, 'C');
+        $pdf->Cell(47, 7, 'Rs. '.number_format($totalSales, 2), 1, 0, 'C');
         $pdf->SetTextColor(185, 28, 28);
-        $pdf->Cell(47, 8, 'Rs. '.number_format($totalExpenses, 2), 1, 0, 'C');
+        $pdf->Cell(47, 7, 'Rs. '.number_format($totalExpenses, 2), 1, 0, 'C');
         $pdf->SetTextColor(16, 185, 129);
-        $pdf->Cell(47, 8, 'Rs. '.number_format($netRevenue, 2), 1, 0, 'C');
+        $pdf->Cell(47, 7, 'Rs. '.number_format($netRevenue, 2), 1, 0, 'C');
         $pdf->SetTextColor(217, 119, 6);
-        $pdf->Cell(49, 8, 'Rs. '.number_format($totalDues, 2), 1, 1, 'C');
+        $pdf->Cell(49, 7, 'Rs. '.number_format($totalDues, 2), 1, 1, 'C');
 
-        $pdf->Ln(5);
+        $pdf->Ln(4);
+
+        // Category Breakdown sub-summary
+        $pdf->SetFont('Arial', 'B', 7.5);
+        $pdf->SetFillColor(248, 250, 252);
+        $pdf->SetTextColor(71, 85, 105);
+        $pdf->Cell(38, 6, 'Consultations: Rs. '.number_format($consultationSales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Pharmacy: Rs. '.number_format($pharmacySales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Procedures: Rs. '.number_format($procedureSales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Lab: Rs. '.number_format($labSales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Other: Rs. '.number_format($otherSales, 0), 1, 1, 'C', true);
+
+        $pdf->Ln(4);
 
         // Table Header
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->SetFillColor(30, 58, 138);
         $pdf->SetTextColor(255, 255, 255);
-        $pdf->Cell(20, 7, '#APT ID', 1, 0, 'C', true);
-        $pdf->Cell(35, 7, 'Date & Time', 1, 0, 'C', true);
+        $pdf->Cell(28, 7, 'Invoice / Ref #', 1, 0, 'C', true);
+        $pdf->Cell(25, 7, 'Date', 1, 0, 'C', true);
+        $pdf->Cell(38, 7, 'Category', 1, 0, 'L', true);
         $pdf->Cell(45, 7, 'Patient Name', 1, 0, 'L', true);
-        $pdf->Cell(50, 7, 'Specialist Doctor', 1, 0, 'L', true);
-        $pdf->Cell(40, 7, 'Consultation Fee (Rs.)', 1, 1, 'R', true);
+        $pdf->Cell(30, 7, 'Method', 1, 0, 'C', true);
+        $pdf->Cell(24, 7, 'Net (Rs.)', 1, 1, 'R', true);
 
         // Table Body
-        $pdf->SetFont('Arial', '', 8);
+        $pdf->SetFont('Arial', '', 7.5);
         $fill = false;
-        foreach ($appointments as $apt) {
-            $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
-            $pdf->SetTextColor(30, 41, 59);
 
-            $pdf->Cell(20, 6, '#APT-'.str_pad((string) $apt->id, 4, '0', STR_PAD_LEFT), 1, 0, 'C', $fill);
-            $pdf->Cell(35, 6, $apt->created_at ? $apt->created_at->format('d M Y h:i A') : '-', 1, 0, 'C', $fill);
-            $pdf->Cell(45, 6, substr($apt->name, 0, 24), 1, 0, 'L', $fill);
-            $docName = $apt->doctor ? substr($apt->doctor->name, 0, 26) : 'Unassigned';
-            $pdf->Cell(50, 6, $docName, 1, 0, 'L', $fill);
-            $fee = $apt->doctor ? (float) $apt->doctor->fee : 0.0;
-            $pdf->Cell(40, 6, number_format($fee, 2), 1, 1, 'R', $fill);
+        // If custom payments exist, list them
+        if ($payments->isNotEmpty()) {
+            foreach ($payments as $pay) {
+                $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
+                $pdf->SetTextColor(30, 41, 59);
 
-            $fill = ! $fill;
+                $pdf->Cell(28, 6, substr($pay->invoice_no, 0, 16), 1, 0, 'C', $fill);
+                $pdf->Cell(25, 6, $pay->payment_date ? Carbon::parse($pay->payment_date)->format('d M Y') : '-', 1, 0, 'C', $fill);
+                $pdf->Cell(38, 6, substr($pay->category, 0, 22), 1, 0, 'L', $fill);
+                $pdf->Cell(45, 6, substr($pay->patient_name, 0, 25), 1, 0, 'L', $fill);
+                $pdf->Cell(30, 6, substr($pay->payment_method, 0, 16), 1, 0, 'C', $fill);
+                $pdf->Cell(24, 6, number_format((float) $pay->net_amount, 2), 1, 1, 'R', $fill);
+
+                $fill = ! $fill;
+            }
+        } else {
+            // Otherwise show appointment consultations
+            foreach ($appointments as $apt) {
+                $pdf->SetFillColor($fill ? 248 : 255, $fill ? 250 : 255, $fill ? 252 : 255);
+                $pdf->SetTextColor(30, 41, 59);
+
+                $pdf->Cell(28, 6, '#APT-'.str_pad((string) $apt->id, 4, '0', STR_PAD_LEFT), 1, 0, 'C', $fill);
+                $pdf->Cell(25, 6, $apt->created_at ? $apt->created_at->format('d M Y') : '-', 1, 0, 'C', $fill);
+                $pdf->Cell(38, 6, 'Consultation', 1, 0, 'L', $fill);
+                $pdf->Cell(45, 6, substr($apt->name, 0, 25), 1, 0, 'L', $fill);
+                $pdf->Cell(30, 6, 'Direct Billing', 1, 0, 'C', $fill);
+                $fee = $apt->doctor ? (float) $apt->doctor->fee : 0.0;
+                $pdf->Cell(24, 6, number_format($fee, 2), 1, 1, 'R', $fill);
+
+                $fill = ! $fill;
+            }
         }
 
         // Summary Total Row
-        $pdf->SetFont('Arial', 'B', 9);
+        $pdf->SetFont('Arial', 'B', 8.5);
         $pdf->SetFillColor(241, 245, 249);
         $pdf->SetTextColor(15, 23, 42);
-        $pdf->Cell(150, 8, 'TOTAL ACCUMULATED CONSULTATION BILLING:', 1, 0, 'R', true);
+        $pdf->Cell(166, 8, 'TOTAL ACCUMULATED GROSS SALES:', 1, 0, 'R', true);
         $pdf->SetTextColor(37, 99, 235);
-        $pdf->Cell(40, 8, 'Rs. '.number_format($totalConsultation, 2), 1, 1, 'R', true);
+        $pdf->Cell(24, 8, 'Rs. '.number_format($totalSales, 0), 1, 1, 'R', true);
 
         return response($pdf->Output('S'))
             ->header('Content-Type', 'application/pdf')

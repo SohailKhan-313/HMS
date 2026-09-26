@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Appointment extends Model
 {
@@ -48,5 +49,13 @@ class Appointment extends Model
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(Doctor::class, 'doctor_id');
+    }
+
+    /**
+     * Get the payments associated with the appointment.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(HospitalPayment::class, 'appointment_id');
     }
 }

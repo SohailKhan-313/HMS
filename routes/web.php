@@ -91,7 +91,11 @@ Route::prefix('patients')->name('patients.')->group(function () {
 });
 
 // Hospital Payments (Billing & Reports)
-Route::get('/hospital-payments', [HospitalPaymentController::class, 'index'])->name('hospital-payments');
+Route::prefix('hospital-payments')->group(function () {
+    Route::get('/', [HospitalPaymentController::class, 'index'])->name('hospital-payments');
+    Route::post('/', [HospitalPaymentController::class, 'store'])->name('hospital-payments.store');
+    Route::delete('/{id}', [HospitalPaymentController::class, 'destroy'])->name('hospital-payments.destroy');
+});
 
 // FPDF Table Export & PDF Printing
 Route::prefix('reports')->name('reports.')->group(function () {

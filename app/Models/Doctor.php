@@ -49,4 +49,12 @@ class Doctor extends Model
     {
         return $this->hasMany(Appointment::class, 'doctor_id');
     }
+
+    /**
+     * Get the hospital payments associated with the doctor.
+     */
+    public function hospitalPayments(): HasMany
+    {
+        return $this->hasMany(HospitalPayment::class, 'doctor_id');
+    }
 }

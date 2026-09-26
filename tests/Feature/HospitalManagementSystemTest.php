@@ -3,6 +3,7 @@
 use App\Models\Appointment;
 use App\Models\Doctor;
 use App\Models\Expense;
+use App\Models\HospitalPayment;
 use App\Models\PatientHistory;
 use App\Models\Staff;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -362,4 +363,92 @@ test('bootstrap and jquery assets are properly loaded in the layout', function (
     $response->assertSee('/css/bootstrap.min.css');
     $response->assertSee('/js/bootstrap.bundle.min.js');
     $response->assertSee('/js/jquery.min.js');
+});
+
+test('can create a custom hospital payment linked to patient and doctor', function () {
+    $patient = PatientHistory::create([
+        'name' => 'Zubair Ahmed',
+        'age' => 35,
+        'phone' => '03009988776',
+        'cnic' => '17301-1234567-1',
+        'due_amount' => 500.00,
+        'wallet_amount' => 1000.00,
+    ]);
+
+    $doctor = Doctor::create([
+        'name' => 'Dr. Kamran Ali',
+        'email' => 'kamran@hospital.test',
+        'phone' => '03331234567',
+        'speciality' => 'Pathology',
+        'pmdc' => 'PMC-9988-P',
+        'fee' => 1200.00,
+    ]);
+
+    $paymentData = [
+        'category' => 'Pharmacy / Medicine',
+        'patient_id' => $patient->id,
+        'patient_name' => $patient->name,
+        'patient_phone' => $patient->phone,
+        'doctor_id' => $doctor->id,
+        'amount' => 2500.00,
+        'discount' => 200.00,
+        'paid_amount' => 2300.00,
+        'payment_method' => 'Cash',
+        'payment_date' => now()->toDateString(),
+        'status' => 'Paid',
+        'notes' => 'Prescription antibiotics and analgesics',
+    ];
+
+    $response = $this->post(route('hospital-payments.store'), $paymentData);
+
+    $response->assertRedirect(route('hospital-payments'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseHas('hospital_payments', [
+        'category' => 'Pharmacy / Medicine',
+        'patient_id' => $patient->id,
+        'doctor_id' => $doctor->id,
+        'amount' => 2500.00,
+        'discount' => 200.00,
+        'net_amount' => 2300.00,
+        'paid_amount' => 2300.00,
+        'status' => 'Paid',
+    ]);
+
+    // Check relationship from patient and doctor
+    $patient->refresh();
+    expect($patient->payments()->count())->toBe(1);
+    expect($doctor->hospitalPayments()->count())->toBe(1);
+
+    // Verify it appears in hospital payments view
+    $viewResponse = $this->get(route('hospital-payments'));
+    $viewResponse->assertOk();
+    $viewResponse->assertSee('Pharmacy / Medicine');
+    $viewResponse->assertSee('Prescription antibiotics and analgesics');
+    $viewResponse->assertSee('Zubair Ahmed');
+});
+
+test('can delete a hospital payment record', function () {
+    $payment = HospitalPayment::create([
+        'invoice_no' => HospitalPayment::generateInvoiceNo(),
+        'category' => 'Diagnostics / Lab',
+        'patient_name' => 'Walk-in Patient',
+        'amount' => 1500.00,
+        'discount' => 0.00,
+        'net_amount' => 1500.00,
+        'paid_amount' => 1500.00,
+        'payment_method' => 'Card',
+        'payment_date' => now()->toDateString(),
+        'status' => 'Paid',
+        'notes' => 'Complete Blood Count (CBC)',
+    ]);
+
+    $response = $this->delete(route('hospital-payments.destroy', $payment->id));
+
+    $response->assertRedirect(route('hospital-payments'));
+    $response->assertSessionHas('success');
+
+    $this->assertDatabaseMissing('hospital_payments', [
+        'id' => $payment->id,
+    ]);
 });
