@@ -94,23 +94,25 @@
           <!-- Topbar Right Controls: WhatsApp, Email, AI Assistant & Profile -->
           <div class="top-navbar-right ms-auto">
             <ul class="navbar-nav align-items-center gap-2">
-              <!-- WhatsApp Direct Contact Button -->
+              <!-- WhatsApp Direct Contact Icon -->
               <li class="nav-item">
                 <a href="https://wa.me/923470232059?text=Hello%20Hospital%20Management" target="_blank" 
-                   class="btn btn-sm btn-outline-success d-flex align-items-center gap-1 rounded-pill px-2 px-md-3 shadow-sm text-decoration-none" 
-                   title="Direct WhatsApp: 03470232059">
-                  <i class="bi bi-whatsapp fs-6 text-success"></i>
-                  <span class="font-12 fw-semibold d-none d-md-inline text-dark">03470232059</span>
+                   class="btn btn-sm btn-outline-success rounded-circle d-flex align-items-center justify-content-center shadow-sm p-0" 
+                   style="width: 36px; height: 36px;"
+                   title="WhatsApp: 03470232059"
+                   aria-label="WhatsApp: 03470232059">
+                  <i class="bi bi-whatsapp fs-6"></i>
                 </a>
               </li>
 
-              <!-- Email Direct Contact Button -->
+              <!-- Email Direct Contact Icon -->
               <li class="nav-item">
                 <a href="mailto:skpattan850911@gmail.com" 
-                   class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 rounded-pill px-2 px-md-3 shadow-sm text-decoration-none" 
-                   title="Email: skpattan850911@gmail.com">
-                  <i class="bi bi-envelope-at-fill fs-6 text-primary"></i>
-                  <span class="font-12 fw-semibold d-none d-lg-inline text-dark">skpattan850911@gmail.com</span>
+                   class="btn btn-sm btn-outline-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm p-0" 
+                   style="width: 36px; height: 36px;"
+                   title="Email: skpattan850911@gmail.com"
+                   aria-label="Email: skpattan850911@gmail.com">
+                  <i class="bi bi-envelope-at-fill fs-6"></i>
                 </a>
               </li>
 
