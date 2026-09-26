@@ -30,7 +30,7 @@ EOF
 rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
 a2enmod mpm_prefork 2>/dev/null || true
 
-# Run our dedicated PHP script to initialize .env safely without sed
+# Run our dedicated PHP script to initialize .env safely
 php /var/www/html/docker-init-env.php || true
 
 # If APP_KEY is still not present in .env, generate one
@@ -40,21 +40,21 @@ if [ -z "$CURRENT_KEY" ]; then
     php artisan key:generate --force || true
 fi
 
-# Set directory permissions
-mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache /var/www/html/.env
-chmod -R 775 storage bootstrap/cache
-chmod 664 /var/www/html/.env
-
-# Run database migrations safely
-if [ "$AUTO_MIGRATE" = "true" ]; then
-    if [ -z "$DB_HOST" ] || [ "$DB_HOST" = "<your_db_host>" ] || [ "$DB_HOST" = "127.0.0.1" ] || [ "$DB_HOST" = "localhost" ]; then
-        echo "[Notice] DB_HOST is set to '${DB_HOST:-none}'. Skipping automatic migrations."
-    else
-        echo "Attempting database migrations on host '${DB_HOST}'..."
-        php artisan migrate --force || echo "[Warning] Database migration failed. Continuing web server startup..."
-    fi
+# Ensure SQLite file exists and database directory has write permissions
+mkdir -p /var/www/html/database
+if [ ! -f /var/www/html/database/database.sqlite ]; then
+    touch /var/www/html/database/database.sqlite
 fi
+
+# Set directory permissions for web server
+mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache /var/www/html/database /var/www/html/.env
+chmod -R 775 storage bootstrap/cache /var/www/html/database
+chmod 664 /var/www/html/.env /var/www/html/database/database.sqlite 2>/dev/null || true
+
+# Run database migrations to ensure all tables (including sessions and hospital tables) exist
+echo "Running database migrations..."
+php artisan migrate --force || echo "[Warning] Database migration failed or skipped. Continuing startup..."
 
 # Cache views for performance
 php artisan view:cache || true
