@@ -31,6 +31,9 @@ if (empty($dbHost) || str_contains($dbHost, '<') || str_contains($dbHost, 'your_
         'DB_PORT' => '',
         'DB_USERNAME' => '',
         'DB_PASSWORD' => '',
+        'SESSION_DRIVER' => 'file',
+        'CACHE_STORE' => 'file',
+        'LOG_CHANNEL' => 'stderr',
     ];
 } else {
     echo "[Database] Connecting to MySQL host: {$dbHost}\n";
@@ -45,6 +48,9 @@ if (empty($dbHost) || str_contains($dbHost, '<') || str_contains($dbHost, 'your_
         'DB_DATABASE' => getenv('DB_DATABASE') ?: null,
         'DB_USERNAME' => getenv('DB_USERNAME') ?: null,
         'DB_PASSWORD' => getenv('DB_PASSWORD') ?: null,
+        'SESSION_DRIVER' => getenv('SESSION_DRIVER') ?: 'file',
+        'CACHE_STORE' => getenv('CACHE_STORE') ?: 'file',
+        'LOG_CHANNEL' => getenv('LOG_CHANNEL') ?: 'stderr',
     ];
 }
 

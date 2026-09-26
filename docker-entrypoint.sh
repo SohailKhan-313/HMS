@@ -4,12 +4,12 @@ set -e
 # Support dynamic port binding on cloud platforms (Render, Railway, Fly.io)
 PORT="${PORT:-80}"
 
-# Cleanly write Apache ports configuration (no sed, no duplicate ports)
+# Cleanly write Apache ports configuration
 cat <<EOF > /etc/apache2/ports.conf
 Listen ${PORT}
 EOF
 
-# Cleanly write default VirtualHost configuration (no sed, no syntax errors)
+# Cleanly write default VirtualHost configuration
 cat <<EOF > /etc/apache2/sites-available/000-default.conf
 <VirtualHost *:${PORT}>
     ServerAdmin webmaster@localhost
@@ -30,6 +30,17 @@ EOF
 rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.* 2>/dev/null || true
 a2enmod mpm_prefork 2>/dev/null || true
 
+# Prepare all writable directories and files
+mkdir -p /var/www/html/storage/logs \
+         /var/www/html/storage/framework/cache/data \
+         /var/www/html/storage/framework/sessions \
+         /var/www/html/storage/framework/views \
+         /var/www/html/bootstrap/cache \
+         /var/www/html/database
+
+touch /var/www/html/storage/logs/laravel.log
+touch /var/www/html/database/database.sqlite
+
 # Run our dedicated PHP script to initialize .env safely
 php /var/www/html/docker-init-env.php || true
 
@@ -40,24 +51,22 @@ if [ -z "$CURRENT_KEY" ]; then
     php artisan key:generate --force || true
 fi
 
-# Ensure SQLite file exists and database directory has write permissions
-mkdir -p /var/www/html/database
-if [ ! -f /var/www/html/database/database.sqlite ]; then
-    touch /var/www/html/database/database.sqlite
-fi
-
-# Set directory permissions for web server
-mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache /var/www/html/database /var/www/html/.env
-chmod -R 775 storage bootstrap/cache /var/www/html/database
-chmod 664 /var/www/html/.env /var/www/html/database/database.sqlite 2>/dev/null || true
-
-# Run database migrations to ensure all tables (including sessions and hospital tables) exist
+# Run database migrations to ensure all tables exist
 echo "Running database migrations..."
 php artisan migrate --force || echo "[Warning] Database migration failed or skipped. Continuing startup..."
 
 # Cache views for performance
 php artisan view:cache || true
+
+# Re-apply complete permissions so Apache (www-data) can read/write everything without permission errors
+chown -R www-data:www-data /var/www/html/storage \
+                           /var/www/html/bootstrap/cache \
+                           /var/www/html/database \
+                           /var/www/html/.env
+chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/database
+chmod 664 /var/www/html/.env /var/www/html/database/database.sqlite 2>/dev/null || true
+chmod 666 /var/www/html/storage/logs/laravel.log 2>/dev/null || true
 
 echo "Starting Apache web server on port ${PORT}..."
 exec apache2-foreground
