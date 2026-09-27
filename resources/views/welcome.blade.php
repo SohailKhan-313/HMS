@@ -21,15 +21,31 @@
                     <button type="button" class="btn btn-dark btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="if(typeof window.toggleHMSChatbot === 'function'){ window.toggleHMSChatbot(true); } else { document.getElementById('hms-chatbot-launcher')?.click(); }">
                         <i class="bi bi-robot text-info"></i> AI Assistant
                     </button>
+                    @if(!auth()->check() || auth()->user()->canAccessAppointments())
                     <a href="{{ route('appointment.index') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
                         <i class="bi bi-calendar-plus"></i> Appointments
                     </a>
+                    @endif
+                    @if(!auth()->check() || auth()->user()->canAccessPatients())
                     <a href="{{ route('patients.index') }}" class="btn btn-success btn-sm d-flex align-items-center gap-1 shadow-sm">
                         <i class="bi bi-person-plus"></i> Patients Directory
                     </a>
+                    @endif
+                    @if(!auth()->check() || auth()->user()->canAccessPayments())
+                    <a href="{{ route('hospital-payments') }}" class="btn btn-info btn-sm d-flex align-items-center gap-1 shadow-sm text-white">
+                        <i class="bi bi-cash-stack"></i> Payments
+                    </a>
+                    @endif
+                    @if(auth()->check() && auth()->user()->canManageUsers())
+                    <a href="{{ route('users.index') }}" class="btn btn-warning btn-sm d-flex align-items-center gap-1 shadow-sm text-dark">
+                        <i class="bi bi-shield-lock"></i> Users & Roles
+                    </a>
+                    @endif
+                    @if(!auth()->check() || auth()->user()->canAccessAppointments())
                     <a href="{{ route('reports.appointments.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
                         <i class="bi bi-file-earmark-pdf"></i> Print Registry (PDF)
                     </a>
+                    @endif
                 </div>
             </div>
         </div>
@@ -56,9 +72,13 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
+                    @if(!auth()->check() || auth()->user()->canAccessPatients())
                     <a href="{{ route('patients.index') }}" class="font-12 text-primary fw-semibold text-decoration-none">
                         View Patients Directory <i class="bi bi-arrow-right"></i>
                     </a>
+                    @else
+                    <span class="font-12 text-muted fw-semibold">Patient Records</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -82,9 +102,13 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
+                    @if(!auth()->check() || auth()->user()->canAccessAppointments())
                     <a href="{{ route('appointment.index') }}" class="font-12 text-info fw-semibold text-decoration-none">
                         Manage Appointments <i class="bi bi-arrow-right"></i>
                     </a>
+                    @else
+                    <span class="font-12 text-muted fw-semibold">Appointment Schedule</span>
+                    @endif
                 </div>
             </div>
         </div>
@@ -132,9 +156,17 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pt-0 pb-3">
+                    @if(!auth()->check() || auth()->user()->canManageStaff())
                     <a href="{{ route('staff.index') }}" class="font-12 text-success fw-semibold text-decoration-none">
                         View Staff Directory <i class="bi bi-arrow-right"></i>
                     </a>
+                    @elseif(auth()->check() && auth()->user()->canAccessExpenses())
+                    <a href="{{ route('expenses.index') }}" class="font-12 text-success fw-semibold text-decoration-none">
+                        View Daily Expenses <i class="bi bi-arrow-right"></i>
+                    </a>
+                    @else
+                    <span class="font-12 text-muted fw-semibold">Hospital Operations</span>
+                    @endif
                 </div>
             </div>
         </div>

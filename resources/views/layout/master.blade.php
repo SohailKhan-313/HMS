@@ -63,31 +63,48 @@
                   <i class="bi bi-speedometer2 me-1"></i> Dashboard
                 </a>
               </li>
+              @if(!auth()->check() || auth()->user()->canAccessAppointments())
               <li class="nav-item">
                 <a class="nav-link px-2 {{ request()->routeIs('appointment.*') ? 'active fw-bold text-primary' : 'text-dark' }}" href="{{ route('appointment.index') }}">
                   <i class="bi bi-calendar-check me-1"></i> Appointments
                 </a>
               </li>
+              @endif
+              @if(!auth()->check() || auth()->user()->isDoctor() || auth()->user()->canManageDoctors() || auth()->user()->isReceptionist())
               <li class="nav-item">
                 <a class="nav-link px-2 {{ request()->routeIs('doctors.*') ? 'active fw-bold text-primary' : 'text-dark' }}" href="{{ route('doctors.index') }}">
                   <i class="bi bi-person-badge me-1"></i> Doctors
                 </a>
               </li>
+              @endif
+              @if(!auth()->check() || auth()->user()->canAccessPatients())
               <li class="nav-item">
                 <a class="nav-link px-2 {{ request()->routeIs('patients.*') ? 'active fw-bold text-primary' : 'text-dark' }}" href="{{ route('patients.index') }}">
                   <i class="bi bi-person-lines-fill me-1"></i> Patients
                 </a>
               </li>
+              @endif
+              @if(!auth()->check() || auth()->user()->canAccessPayments())
               <li class="nav-item">
                 <a class="nav-link px-2 {{ request()->routeIs('hospital-payments') ? 'active fw-bold text-primary' : 'text-dark' }}" href="{{ route('hospital-payments') }}">
                   <i class="bi bi-wallet2 me-1"></i> Payments
                 </a>
               </li>
+              @endif
+              @if(!auth()->check() || auth()->user()->canAccessExpenses())
               <li class="nav-item">
                 <a class="nav-link px-2 {{ request()->routeIs('expenses.*') || request()->routeIs('category.*') ? 'active fw-bold text-primary' : 'text-dark' }}" href="{{ route('expenses.index') }}">
                   <i class="bi bi-receipt me-1"></i> Expenses
                 </a>
               </li>
+              @endif
+              @if(auth()->check() && auth()->user()->canManageUsers())
+              <li class="nav-item">
+                <a class="nav-link px-2 {{ request()->routeIs('users.*') ? 'active fw-bold text-primary' : 'text-dark' }}" href="{{ route('users.index') }}">
+                  <i class="bi bi-shield-lock me-1"></i> Users & Roles
+                </a>
+              </li>
+              @endif
             </ul>
           </div>
 
@@ -127,24 +144,29 @@
                 </button>
               </li>
 
-              <!-- Hospital Admin User Profile Dropdown -->
+              <!-- Hospital User Profile Dropdown & Logout -->
+              @auth
               <li class="nav-item dropdown dropdown-large ms-1">
                 <a class="nav-link dropdown-toggle dropdown-toggle-nocaret d-flex align-items-center gap-2 p-1 rounded-pill bg-light border px-2 shadow-sm" href="#" data-bs-toggle="dropdown">
                   <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold font-12" style="width: 32px; height: 32px;">
-                    <i class="bi bi-hospital"></i>
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                   </div>
-                  <span class="font-12 fw-bold text-dark d-none d-sm-inline">HMS Admin</span>
+                  <div class="d-none d-sm-block text-start lh-1">
+                    <span class="font-12 fw-bold text-dark d-block">{{ auth()->user()->name }}</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-10 text-uppercase py-0 px-1">{{ auth()->user()->role }}</span>
+                  </div>
                   <i class="bi bi-chevron-down font-11 text-secondary"></i>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 radius-10 p-2" style="min-width: 240px;">
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 radius-10 p-2" style="min-width: 250px;">
                   <li class="p-2 border-bottom mb-2 bg-light radius-10">
                     <div class="d-flex align-items-center gap-2">
-                      <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; font-size: 18px;">
-                        <i class="bi bi-person-badge-fill"></i>
+                      <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 16px;">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                       </div>
-                      <div>
-                        <h6 class="mb-0 font-13 fw-bold text-dark">Hospital Administrator</h6>
-                        <small class="text-muted font-11">skpattan850911@gmail.com</small>
+                      <div class="overflow-hidden">
+                        <h6 class="mb-0 font-13 fw-bold text-dark text-truncate">{{ auth()->user()->name }}</h6>
+                        <small class="text-muted font-11 text-truncate d-block">{{ auth()->user()->email }}</small>
+                        <span class="badge bg-secondary-subtle text-secondary font-10 text-uppercase mt-1">{{ auth()->user()->role }}</span>
                       </div>
                     </div>
                   </li>
@@ -153,35 +175,50 @@
                       <i class="bi bi-speedometer2 text-primary font-14"></i> Dashboard Overview
                     </a>
                   </li>
+                  @if(auth()->user()->canManageUsers())
+                  <li>
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2 font-13 radius-10" href="{{ route('users.index') }}">
+                      <i class="bi bi-shield-lock text-primary font-14"></i> Users & Role Access
+                    </a>
+                  </li>
+                  @endif
+                  @if(auth()->user()->canAccessPayments())
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2 font-13 radius-10" href="{{ route('hospital-payments') }}">
                       <i class="bi bi-wallet2 text-success font-14"></i> Hospital Payments
                     </a>
                   </li>
+                  @endif
+                  @if(auth()->user()->canAccessExpenses())
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2 font-13 radius-10" href="{{ route('expenses.index') }}">
                       <i class="bi bi-receipt text-danger font-14"></i> Daily Expenses
                     </a>
                   </li>
-                  <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center gap-2 font-13 radius-10" href="{{ route('reports.patients.pdf') }}" target="_blank">
-                      <i class="bi bi-file-earmark-pdf text-danger font-14"></i> PDF Reports Center
-                    </a>
-                  </li>
+                  @endif
                   <li><hr class="dropdown-divider my-2"></li>
                   <li>
-                    <a class="dropdown-item py-2 d-flex align-items-center gap-2 font-12 text-secondary radius-10" href="https://wa.me/923470232059" target="_blank">
-                      <i class="bi bi-whatsapp text-success font-14"></i> WhatsApp Support: 03470232059
-                    </a>
+                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                      @csrf
+                      <button type="submit" class="dropdown-item py-2 d-flex align-items-center gap-2 font-13 radius-10 text-danger border-0 bg-transparent w-100 text-start">
+                        <i class="bi bi-box-arrow-right font-14"></i> Sign Out / Logout
+                      </button>
+                    </form>
                   </li>
                 </ul>
               </li>
+              @else
+              <li class="nav-item">
+                <a href="{{ route('login') }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                  <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                </a>
+              </li>
+              @endauth
             </ul>
           </div>
         </nav>
       </header>
       <!--end top header-->
-        <!--start sidebar -->
         <!--start sidebar -->
     <aside class="sidebar-wrapper" data-simplebar="true">
       <div class="sidebar-header">
@@ -205,6 +242,17 @@
           </a>
         </li>
 
+        @if(!auth()->check() || auth()->user()->canManageUsers())
+        <!-- Users & Role Access (Admin Only) -->
+        <li class="{{ request()->routeIs('users.*') ? 'mm-active' : '' }}">
+          <a href="{{ route('users.index') }}">
+            <div class="parent-icon"><i class="bi bi-shield-lock text-primary"></i></div>
+            <div class="menu-title">Users & Roles</div>
+          </a>
+        </li>
+        @endif
+
+        @if(!auth()->check() || auth()->user()->canAccessAppointments())
         <!-- Appointments -->
         <li class="{{ request()->routeIs('appointment.*') ? 'mm-active' : '' }}">
           <a href="{{ route('appointment.index') }}">
@@ -212,7 +260,9 @@
             <div class="menu-title">Appointments</div>
           </a>
         </li>
+        @endif
 
+        @if(!auth()->check() || auth()->user()->isDoctor() || auth()->user()->canManageDoctors() || auth()->user()->isReceptionist())
         <!-- Doctors -->
         <li class="{{ request()->routeIs('doctors.*') ? 'mm-active' : '' }}">
           <a href="{{ route('doctors.index') }}">
@@ -220,7 +270,9 @@
             <div class="menu-title">Doctors</div>
           </a>
         </li>
+        @endif
 
+        @if(!auth()->check() || auth()->user()->canManageStaff())
         <!-- Staff -->
         <li class="{{ request()->routeIs('staff.*') ? 'mm-active' : '' }}">
           <a href="{{ route('staff.index') }}">
@@ -228,7 +280,9 @@
             <div class="menu-title">Staff Members</div>
           </a>
         </li>
+        @endif
 
+        @if(!auth()->check() || auth()->user()->canAccessPatients())
         <!-- Patient History -->
         <li class="{{ request()->routeIs('patients.*') ? 'mm-active' : '' }}">
           <a href="{{ route('patients.index') }}">
@@ -236,7 +290,9 @@
             <div class="menu-title">Patients & History</div>
           </a>
         </li>
+        @endif
 
+        @if(!auth()->check() || auth()->user()->canAccessPayments())
         <!-- Hospital Payments -->
         <li class="{{ request()->routeIs('hospital-payments') ? 'mm-active' : '' }}">
           <a href="{{ route('hospital-payments') }}">
@@ -244,7 +300,9 @@
             <div class="menu-title">Hospital Payments</div>
           </a>
         </li>
+        @endif
 
+        @if(!auth()->check() || auth()->user()->canAccessExpenses())
         <!-- Daily Expense -->
         @php
           $isExpenseActive = request()->routeIs('expenses.*') || request()->routeIs('category.*');
@@ -263,6 +321,7 @@
             </li>
           </ul>
         </li>
+        @endif
 
         <li class="menu-label text-uppercase text-secondary mt-2 mb-1 px-3 font-11">Reports & Downloads</li>
 
@@ -273,34 +332,71 @@
             <div class="menu-title">PDF Reports</div>
           </a>
           <ul>
+            @if(!auth()->check() || auth()->user()->canAccessPatients())
             <li>
               <a href="{{ route('reports.patients.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Patients Directory (PDF)</a>
             </li>
+            @endif
+            @if(!auth()->check() || auth()->user()->canAccessAppointments())
             <li>
               <a href="{{ route('reports.appointments.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Appointments List (PDF)</a>
             </li>
+            @endif
+            @if(!auth()->check() || auth()->user()->isDoctor() || auth()->user()->canManageDoctors())
             <li>
               <a href="{{ route('reports.doctors.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Doctors Roster (PDF)</a>
             </li>
+            @endif
+            @if(!auth()->check() || auth()->user()->canManageStaff())
             <li>
               <a href="{{ route('reports.staff.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Staff Directory (PDF)</a>
             </li>
+            @endif
+            @if(!auth()->check() || auth()->user()->canAccessExpenses())
             <li>
               <a href="{{ route('reports.expenses.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Expenses Audit (PDF)</a>
             </li>
+            @endif
+            @if(!auth()->check() || auth()->user()->canAccessPayments())
+            <li>
+              <a href="{{ route('reports.payments.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Payments Audit (PDF)</a>
+            </li>
+            @endif
           </ul>
         </li>
 
       </ul>
 
-
       <!--end navigation-->
     </aside>
     <!--end sidebar -->
-       <!--end sidebar -->
 
-       <!--start content-->
-         @yield('content')
+    <!-- Global Flash Alerts -->
+    @if(session('success'))
+    <div class="container-fluid pt-3 px-4">
+      <div class="alert alert-success border-0 bg-success alert-dismissible fade show text-white shadow-sm mb-0">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+          <div>{{ session('success') }}</div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="container-fluid pt-3 px-4">
+      <div class="alert alert-danger border-0 bg-danger alert-dismissible fade show text-white shadow-sm mb-0">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+          <div>{{ session('error') }}</div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
+    @endif
+
+    <!--start content-->
+    @yield('content')
        <!--end page main-->
 
        <!--start overlay-->

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -26,10 +27,78 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'phone' => fake()->phoneNumber(),
+            'role' => User::ROLE_ADMIN,
+            'status' => User::STATUS_ACTIVE,
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => static::$password ??= Hash::make('password123'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_ADMIN,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a doctor.
+     */
+    public function doctor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_DOCTOR,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is HR.
+     */
+    public function hr(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_HR,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an accountant.
+     */
+    public function accountant(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_ACCOUNTANT,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a receptionist.
+     */
+    public function receptionist(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_RECEPTIONIST,
+            'status' => User::STATUS_ACTIVE,
+        ]);
+    }
+
+    /**
+     * Indicate that the user account is inactive.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => User::STATUS_INACTIVE,
+        ]);
     }
 
     /**

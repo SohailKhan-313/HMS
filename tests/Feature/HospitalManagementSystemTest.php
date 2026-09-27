@@ -7,9 +7,15 @@ use App\Models\ExpenseCatagory;
 use App\Models\HospitalPayment;
 use App\Models\PatientHistory;
 use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    $this->admin = User::factory()->admin()->create();
+    $this->actingAs($this->admin);
+});
 
 test('dashboard page renders successfully', function () {
     $response = $this->get(route('welcome'));

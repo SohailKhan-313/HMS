@@ -289,9 +289,11 @@
                     <a href="{{ route('reports.doctors.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm shadow-sm d-flex align-items-center gap-1">
                         <i class="bi bi-file-earmark-pdf"></i> Print / Export (PDF)
                     </a>
+                    @if(auth()->user()?->canManageDoctors())
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#doctorModal">
                         <i class="bi bi-plus-circle me-2"></i> New Doctor
                     </button>
+                    @endif
                 </div>
             </div>
 
@@ -709,6 +711,7 @@
                                     @endforeach
                                 </td>
                                 <td class="text-center">
+                                    @if(auth()->user()?->canManageDoctors())
                                     <a href="#"
                                         class="action-icon me-2"
                                         data-doctor='@json($doctorsData[$d->id])'
@@ -719,6 +722,9 @@
                                     <a href="#" class="action-icon" data-bs-toggle="modal" data-bs-target="#deleteDoctor{{ $d->id }}">
                                         <i class="bi bi-trash"></i>
                                     </a>
+                                    @else
+                                    <span class="badge bg-light text-muted font-11"><i class="bi bi-eye"></i> View Only</span>
+                                    @endif
                                 </td>
                             </tr>
                             <!-- EDIT DOCTOR MODAL (improved) -->
