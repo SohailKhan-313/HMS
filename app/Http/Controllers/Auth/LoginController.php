@@ -58,8 +58,9 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->forget('url.intended');
 
-        return redirect()->intended(route('welcome'))
+        return redirect()->route('welcome')
             ->with('success', "Welcome back, {$user->name}!");
     }
 

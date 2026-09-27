@@ -146,6 +146,13 @@
         </div>
       @endif
 
+      @if (session('error'))
+        <div class="alert alert-danger d-flex align-items-center gap-2 rounded-12 p-3 font-13 mb-3 border-0 bg-danger bg-opacity-10 text-danger">
+          <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+          <div>{{ session('error') }}</div>
+        </div>
+      @endif
+
       @if (session('info'))
         <div class="alert alert-info d-flex align-items-center gap-2 rounded-12 p-3 font-13 mb-3 border-0 bg-info bg-opacity-10 text-info">
           <i class="bi bi-info-circle-fill fs-5"></i>
