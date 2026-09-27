@@ -312,11 +312,12 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
 
-                        <!-- Body -->
-                        <div class="modal-body">
-                            <form action="{{ route('staff.store') }}" method="POST" enctype="multipart/form-data" id="addStaffForm">
-                                @csrf
+                        <!-- Form -->
+                        <form action="{{ route('staff.store') }}" method="POST" enctype="multipart/form-data" id="addStaffForm">
+                            @csrf
 
+                            <!-- Body -->
+                            <div class="modal-body">
                                 <div class="row g-4">
                                     <div class="col-md-6">
                                         <label class="form-label">
@@ -338,7 +339,6 @@
                                         </label>
                                         <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
                                     </div>
-                                   
 
                                     <div class="col-md-6">
                                         <label class="form-label">
@@ -362,18 +362,18 @@
                                         <img id="addImagePreview" class="image-preview mt-2" style="display: none;">
                                     </div>
                                 </div>
-                            </form>
-                        </div>
+                            </div>
 
-                        <!-- Footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
-                                <i class="bi bi-x-lg me-2"></i>Cancel
-                            </button>
-                            <button type="submit" form="addStaffForm" class="btn btn-save text-white">
-                                <i class="bi bi-check-lg me-2"></i>Save Staff
-                            </button>
-                        </div>
+                            <!-- Footer -->
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-lg me-2"></i>Cancel
+                                </button>
+                                <button type="submit" class="btn btn-save text-white">
+                                    <i class="bi bi-check-lg me-2"></i>Save Staff
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -488,11 +488,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 </span>
             </td>
             <td>
-                @if($s->image)
-                    <img src="{{ asset('storage/' . $s->image) }}" width="40" height="40"
-                         style="border-radius:50%; object-fit: cover;">
+                @if($s->image_url)
+                    <div class="position-relative d-inline-block">
+                        <img src="{{ $s->image_url }}" alt="{{ $s->name }}" width="42" height="42"
+                             class="rounded-circle shadow-sm"
+                             style="object-fit: cover; border: 2px solid #e9eef2;"
+                             onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-none align-items-center justify-content-center fw-bold shadow-sm"
+                             style="width: 42px; height: 42px; font-size: 14px; border: 2px solid #e9eef2;">
+                            {{ $s->initials }}
+                        </div>
+                    </div>
                 @else
-                    <span class="text-muted">No image</span>
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                         style="width: 42px; height: 42px; font-size: 14px; border: 2px solid #e9eef2;"
+                         title="No image uploaded">
+                        {{ $s->initials }}
+                    </div>
                 @endif
             </td>
             <td>
@@ -580,12 +592,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <!-- Body -->
-                <div class="modal-body">
-                    <form action="{{ route('staff.update', $s->id) }}" method="POST" enctype="multipart/form-data" id="editStaffForm{{ $s->id }}">
-                        @csrf
-                        @method('PUT')
+                <!-- Form -->
+                <form action="{{ route('staff.update', $s->id) }}" method="POST" enctype="multipart/form-data" id="editStaffForm{{ $s->id }}">
+                    @csrf
+                    @method('PUT')
 
+                    <!-- Body -->
+                    <div class="modal-body">
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label">
@@ -628,26 +641,26 @@ document.addEventListener("DOMContentLoaded", function () {
                                 </label>
                                 <input type="file" name="image" class="form-control" accept="image/*" id="editImageInput{{ $s->id }}" onchange="previewStaffImage(this, 'editImagePreview{{ $s->id }}')">
                                 <div class="mt-2">
-                                    @if($s->image)
-                                        <img id="editImagePreview{{ $s->id }}" src="{{ asset('storage/' . $s->image) }}" class="image-preview" style="display:block;">
+                                    @if($s->image_url)
+                                        <img id="editImagePreview{{ $s->id }}" src="{{ $s->image_url }}" class="image-preview" style="display:block;">
                                     @else
                                         <img id="editImagePreview{{ $s->id }}" class="image-preview" style="display:none;">
                                     @endif
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- Footer -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-2"></i>Cancel
-                    </button>
-                    <button type="submit" form="editStaffForm{{ $s->id }}" class="btn btn-save text-white">
-                        <i class="bi bi-check-lg me-2"></i>Update Staff
-                    </button>
-                </div>
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </button>
+                        <button type="submit" class="btn btn-save text-white">
+                            <i class="bi bi-check-lg me-2"></i>Update Staff
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

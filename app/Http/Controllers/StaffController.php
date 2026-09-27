@@ -54,6 +54,8 @@ class StaffController extends Controller
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('staff', 'public');
+        } else {
+            unset($data['image']);
         }
 
         Staff::create($data);
@@ -104,6 +106,8 @@ class StaffController extends Controller
                 Storage::disk('public')->delete($staffMember->image);
             }
             $data['image'] = $request->file('image')->store('staff', 'public');
+        } else {
+            unset($data['image']);
         }
 
         $staffMember->update($data);

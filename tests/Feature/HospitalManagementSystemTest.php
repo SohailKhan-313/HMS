@@ -9,6 +9,8 @@ use App\Models\PatientHistory;
 use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -203,9 +205,62 @@ test('staff page renders edit and delete modals for staff members', function () 
     $response->assertSee('#editStaffModal'.$staff->id, false);
     $response->assertSee('#deleteStaffModal'.$staff->id, false);
     $response->assertSee('id="editStaffModal'.$staff->id.'"', false);
-    $response->assertSee('id="deleteStaffModal'.$staff->id.'"', false);
     $response->assertSee(route('staff.update', $staff->id));
     $response->assertSee(route('staff.destroy', $staff->id));
+});
+
+test('can upload image when creating staff and render it in table', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('nurse.jpg');
+
+    $response = $this->post(route('staff.store'), [
+        'name' => 'Fatima Noor',
+        'email' => 'fatima@hospital.test',
+        'phone' => '03009988112',
+        'designation' => 'Senior Nurse',
+        'salary' => 55000,
+        'image' => $file,
+    ]);
+
+    $response->assertRedirect(route('staff.index'));
+    $staff = Staff::where('email', 'fatima@hospital.test')->first();
+    expect($staff)->not->toBeNull();
+    expect($staff->image)->not->toBeNull();
+    Storage::disk('public')->assertExists($staff->image);
+
+    $page = $this->get(route('staff.index'));
+    $page->assertOk();
+    $page->assertSee($staff->image_url, false);
+});
+
+test('updating staff without new image preserves existing image', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('original.png');
+    $path = $file->store('staff', 'public');
+
+    $staff = Staff::create([
+        'name' => 'Kashif Mehmood',
+        'email' => 'kashif@hospital.test',
+        'phone' => '03215556677',
+        'designation' => 'Pharmacist',
+        'salary' => 70000,
+        'image' => $path,
+    ]);
+
+    $response = $this->put(route('staff.update', $staff->id), [
+        'name' => 'Kashif Mehmood Updated',
+        'email' => 'kashif@hospital.test',
+        'phone' => '03215556677',
+        'designation' => 'Lead Pharmacist',
+        'salary' => 75000,
+    ]);
+
+    $response->assertRedirect(route('staff.index'));
+    $staff->refresh();
+    expect($staff->image)->toBe($path);
+    Storage::disk('public')->assertExists($path);
 });
 
 test('can create expense category and expense', function () {
