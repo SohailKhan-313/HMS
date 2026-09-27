@@ -96,6 +96,8 @@ class StaffController extends Controller
     {
         $staffMember = Staff::findOrFail($id);
         $data = $request->validated();
+        $data['designation'] = $data['designation'] ?? 'Not Assigned';
+        $data['salary'] = $data['salary'] ?? 0;
 
         if ($request->hasFile('image')) {
             if ($staffMember->image) {

@@ -27,8 +27,8 @@ class UpdateStaffRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:staff,email,'.$staffId],
             'phone' => ['required', 'string', 'max:20'],
-            'designation' => ['required', 'string', 'max:100'],
-            'salary' => ['required', 'numeric', 'min:0'],
+            'designation' => ['nullable', 'string', 'max:100'],
+            'salary' => ['nullable', 'numeric', 'min:0'],
             'image' => ['nullable', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
         ];
     }

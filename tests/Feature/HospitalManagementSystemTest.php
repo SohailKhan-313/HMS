@@ -145,6 +145,69 @@ test('can create staff member', function () {
     ]);
 });
 
+test('can update staff member', function () {
+    $staff = Staff::create([
+        'name' => 'Original Name',
+        'email' => 'original@hospital.test',
+        'phone' => '03001234567',
+        'designation' => 'Assistant Nurse',
+        'salary' => 30000.00,
+    ]);
+
+    $response = $this->put(route('staff.update', $staff->id), [
+        'name' => 'Updated Staff Name',
+        'email' => 'updated@hospital.test',
+        'phone' => '03007654321',
+        'designation' => 'Senior Nurse',
+        'salary' => 50000.00,
+    ]);
+
+    $response->assertRedirect(route('staff.index'));
+    $this->assertDatabaseHas('staff', [
+        'id' => $staff->id,
+        'name' => 'Updated Staff Name',
+        'email' => 'updated@hospital.test',
+        'designation' => 'Senior Nurse',
+    ]);
+});
+
+test('can delete staff member', function () {
+    $staff = Staff::create([
+        'name' => 'To Be Deleted',
+        'email' => 'delete_me@hospital.test',
+        'phone' => '03000000000',
+        'designation' => 'Temporary Ward Staff',
+        'salary' => 20000.00,
+    ]);
+
+    $response = $this->delete(route('staff.destroy', $staff->id));
+
+    $response->assertRedirect(route('staff.index'));
+    $this->assertDatabaseMissing('staff', [
+        'id' => $staff->id,
+    ]);
+});
+
+test('staff page renders edit and delete modals for staff members', function () {
+    $staff = Staff::create([
+        'name' => 'Ayesha Khan',
+        'email' => 'ayesha@hospital.test',
+        'phone' => '03112233445',
+        'designation' => 'Head Nurse',
+        'salary' => 60000.00,
+    ]);
+
+    $response = $this->get(route('staff.index'));
+
+    $response->assertOk();
+    $response->assertSee('#editStaffModal'.$staff->id, false);
+    $response->assertSee('#deleteStaffModal'.$staff->id, false);
+    $response->assertSee('id="editStaffModal'.$staff->id.'"', false);
+    $response->assertSee('id="deleteStaffModal'.$staff->id.'"', false);
+    $response->assertSee(route('staff.update', $staff->id));
+    $response->assertSee(route('staff.destroy', $staff->id));
+});
+
 test('can create expense category and expense', function () {
     $categoryResponse = $this->post(route('category.store'), [
         'name' => 'Medical Supplies',

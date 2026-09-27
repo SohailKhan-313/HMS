@@ -508,11 +508,6 @@ document.addEventListener("DOMContentLoaded", function () {
             </td>
         </tr>
 
-        <!-- Edit Staff Modal (Inside the loop) -->
-        <div class="modal fade" id="editStaffModal{{ $s->id }}" tabindex="-1" aria-hidden="true">
-            <!-- ... your existing modal code ... -->
-        </div>
-
     @empty
         {{-- This block runs ONLY if the $staff collection is empty --}}
         <tr>
@@ -571,7 +566,133 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
 </main>
 
-<!--  -->
+@foreach($staff as $s)
+    <!-- Edit Staff Modal -->
+    <div class="modal fade" id="editStaffModal{{ $s->id }}" tabindex="-1" aria-labelledby="editStaffModalLabel{{ $s->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editStaffModalLabel{{ $s->id }}">
+                        <i class="bi bi-pencil-square me-2"></i>
+                        Edit Staff Member – {{ $s->name }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <form action="{{ route('staff.update', $s->id) }}" method="POST" enctype="multipart/form-data" id="editStaffForm{{ $s->id }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-person me-2"></i>Full Name*
+                                </label>
+                                <input type="text" name="name" class="form-control" value="{{ old('name', $s->name) }}" placeholder="Enter full name" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-briefcase me-2"></i>Designation
+                                </label>
+                                <input type="text" name="designation" class="form-control" value="{{ old('designation', $s->designation) }}" placeholder="e.g., Admin, Nurse">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-envelope me-2"></i>Email Address*
+                                </label>
+                                <input type="email" name="email" class="form-control" value="{{ old('email', $s->email) }}" placeholder="name@example.com" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-telephone me-2"></i>Phone Number*
+                                </label>
+                                <input type="text" name="phone" class="form-control" value="{{ old('phone', $s->phone) }}" placeholder="+92 34 567 890" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-cash me-2"></i>Monthly Salary
+                                </label>
+                                <input type="number" step="0.01" name="salary" class="form-control" value="{{ old('salary', $s->salary) }}" placeholder="Enter amount">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="bi bi-image me-2"></i>Profile Image
+                                </label>
+                                <input type="file" name="image" class="form-control" accept="image/*" id="editImageInput{{ $s->id }}" onchange="previewStaffImage(this, 'editImagePreview{{ $s->id }}')">
+                                <div class="mt-2">
+                                    @if($s->image)
+                                        <img id="editImagePreview{{ $s->id }}" src="{{ asset('storage/' . $s->image) }}" class="image-preview" style="display:block;">
+                                    @else
+                                        <img id="editImagePreview{{ $s->id }}" class="image-preview" style="display:none;">
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i>Cancel
+                    </button>
+                    <button type="submit" form="editStaffForm{{ $s->id }}" class="btn btn-save text-white">
+                        <i class="bi bi-check-lg me-2"></i>Update Staff
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Staff Modal -->
+    <div class="modal fade delete-modal" id="deleteStaffModal{{ $s->id }}" tabindex="-1" aria-labelledby="deleteStaffModalLabel{{ $s->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title text-white" id="deleteStaffModalLabel{{ $s->id }}">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <i class="bi bi-person-x-fill delete-icon"></i>
+                    <h4 class="mb-3">Are you sure?</h4>
+                    <p class="text-muted mb-0">
+                        You are about to delete staff member <strong>{{ $s->name }}</strong>.
+                    </p>
+                    <p class="text-muted">This action cannot be undone.</p>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i>Cancel
+                    </button>
+                    <form action="{{ route('staff.destroy', $s->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-delete text-white">
+                            <i class="bi bi-trash me-2"></i>Yes, Delete Staff
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endforeach
+
 <!-- Image Preview Script -->
 <script>
     // Preview image for Add Modal
@@ -592,10 +713,25 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Preview image for Edit Modals
-    // @foreach($staff as $s)
-    //     document.getElementById('editImageInput{{ $s->id }}')?.addEventListener('change', function(e) {
-    //         // You can add preview for edit modals if needed
-    //     });
-    // @endforeach
+    function previewStaffImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        if (!preview) return;
+        const file = input.files && input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function filterStaff() {
+        const searchInput = document.getElementById('staffSearch');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }
 </script>
 @endsection
