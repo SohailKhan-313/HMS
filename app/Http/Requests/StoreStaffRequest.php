@@ -27,7 +27,7 @@ class StoreStaffRequest extends FormRequest
             'phone' => ['required', 'string', 'max:20'],
             'designation' => ['nullable', 'string', 'max:100'],
             'salary' => ['nullable', 'numeric', 'min:0'],
-            'image' => ['nullable', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,jfif', 'max:10240'],
         ];
     }
 
@@ -45,7 +45,7 @@ class StoreStaffRequest extends FormRequest
             'phone.required' => 'Phone number is required.',
             'salary.numeric' => 'Salary must be a valid number.',
             'image.image' => 'Uploaded file must be a valid image.',
-            'image.max' => 'Staff image may not be larger than 2MB.',
+            'image.max' => 'Staff image may not be larger than 10MB.',
         ];
     }
 }

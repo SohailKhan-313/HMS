@@ -260,6 +260,23 @@
 
 <main class="page-content">
     <div class="container-fluid px-0">
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                    <div>
+                        <strong class="d-block mb-1">Please fix the following issues:</strong>
+                        <ul class="mb-0 ps-3">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <div class="card appointment-card">
             <!-- Header: Create Staff -->
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3">

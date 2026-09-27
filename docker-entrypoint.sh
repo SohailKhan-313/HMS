@@ -65,6 +65,9 @@ done
 # Cache views for performance
 php artisan view:cache || true
 
+# Ensure public storage symlink exists for serving uploaded images
+php artisan storage:link || true
+
 # Re-apply complete permissions so Apache (www-data) can read/write everything without permission errors
 chown -R www-data:www-data /var/www/html/storage \
                            /var/www/html/bootstrap/cache \
