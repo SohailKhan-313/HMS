@@ -167,7 +167,7 @@
       @endif
 
       <!-- Login Form -->
-      <form action="{{ route('login') }}" method="POST">
+      <form action="{{ route('login.post') }}" method="POST">
         @csrf
 
         <div class="mb-3">
@@ -213,10 +213,18 @@
           <span class="font-12 text-muted"><i class="bi bi-shield-check text-success"></i> 256-bit Encrypted</span>
         </div>
 
-        <button type="submit" class="btn btn-login w-100 mb-4 d-flex align-items-center justify-content-center gap-2">
+        <button type="submit" class="btn btn-login w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
           <span>Sign In to Dashboard</span>
           <i class="bi bi-arrow-right"></i>
         </button>
+
+        <!-- Create Account / Sign Up Link -->
+        <div class="text-center mb-3 p-2 bg-light rounded-12 border">
+          <span class="font-13 text-secondary">Don't have an account?</span>
+          <a href="{{ route('register') }}" class="font-13 fw-bold text-primary text-decoration-none ms-1">
+            <i class="bi bi-person-plus me-1"></i>Create Account / Sign Up
+          </a>
+        </div>
 
         <!-- Quick Demo Fill Section -->
         <div class="pt-3 border-top">

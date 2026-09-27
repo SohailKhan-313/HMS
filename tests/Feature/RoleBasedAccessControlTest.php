@@ -288,3 +288,58 @@ test('admin can delete a user account but cannot delete their own account', func
     $deleteResponse->assertRedirect(route('users.index'));
     $this->assertDatabaseMissing('users', ['id' => $staff->id]);
 });
+
+// REGISTRATION / SIGNUP TESTS
+test('registration page renders successfully for guests', function () {
+    $response = $this->get(route('register'));
+
+    $response->assertOk();
+    $response->assertViewIs('auth.register');
+    $response->assertSee('Create HMS Account');
+});
+
+test('guest can register account with role and is authenticated immediately', function () {
+    $response = $this->post(route('register.post'), [
+        'name' => 'Kashif Mehmood',
+        'email' => 'kashif@hospital.test',
+        'phone' => '03001234567',
+        'role' => User::ROLE_ACCOUNTANT,
+        'password' => 'secret123',
+        'password_confirmation' => 'secret123',
+    ]);
+
+    $response->assertRedirect(route('welcome'));
+    $this->assertAuthenticated();
+
+    $user = User::where('email', 'kashif@hospital.test')->first();
+    expect($user)->not->toBeNull();
+    expect($user->role)->toBe(User::ROLE_ACCOUNTANT);
+    expect($user->status)->toBe(User::STATUS_ACTIVE);
+});
+
+test('doctor registration creates linked doctor profile record', function () {
+    $response = $this->post(route('register.post'), [
+        'name' => 'Dr. Zeeshan Haider',
+        'email' => 'zeeshan@hospital.test',
+        'phone' => '03112233445',
+        'role' => User::ROLE_DOCTOR,
+        'speciality' => 'Orthopedic Surgeon',
+        'pmdc' => 'PMC-55667',
+        'fee' => 2200,
+        'password' => 'secret123',
+        'password_confirmation' => 'secret123',
+    ]);
+
+    $response->assertRedirect(route('welcome'));
+    $this->assertAuthenticated();
+
+    $user = User::where('email', 'zeeshan@hospital.test')->first();
+    expect($user)->not->toBeNull();
+    expect($user->doctor_id)->not->toBeNull();
+
+    $this->assertDatabaseHas('doctors', [
+        'id' => $user->doctor_id,
+        'speciality' => 'Orthopedic Surgeon',
+        'pmdc' => 'PMC-55667',
+    ]);
+});
