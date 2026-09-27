@@ -205,7 +205,7 @@
 
         <div class="d-flex align-items-center justify-content-between mb-4">
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="remember" id="rememberCheck" {{ old('remember') ? 'checked' : '' }}>
+            <input class="form-check-input" type="checkbox" name="remember" id="rememberCheck" value="1" {{ old('remember') ? 'checked' : '' }}>
             <label class="form-check-label font-13 text-secondary" for="rememberCheck">
               Remember me
             </label>

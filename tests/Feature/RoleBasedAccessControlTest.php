@@ -29,6 +29,23 @@ test('active user can authenticate with valid credentials and redirect to dashbo
     $this->assertAuthenticatedAs($user);
 });
 
+test('active user can authenticate with remember checkbox on or 1', function () {
+    $user = User::factory()->create([
+        'email' => 'remember.me@hospital.test',
+        'password' => bcrypt('password123'),
+        'status' => User::STATUS_ACTIVE,
+    ]);
+
+    $response = $this->post(route('login.post'), [
+        'email' => 'remember.me@hospital.test',
+        'password' => 'password123',
+        'remember' => 'on',
+    ]);
+
+    $response->assertRedirect(route('welcome'));
+    $this->assertAuthenticatedAs($user);
+});
+
 test('user cannot authenticate with invalid credentials', function () {
     User::factory()->create([
         'email' => 'staff@hospital.test',
