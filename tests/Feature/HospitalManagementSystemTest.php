@@ -441,46 +441,6 @@ test('can cancel appointments by date', function () {
     expect($appointment->status)->toBe('Cancelled');
 });
 
-test('chatbot provides hospital records information and medical triage suggestions', function () {
-    $doctor = Doctor::create([
-        'name' => 'Dr. Tariq Dent',
-        'email' => 'tariq@hospital.test',
-        'phone' => '03001112233',
-        'speciality' => 'Dentist',
-        'pmdc' => 'PMC-1122-D',
-        'fee' => 1500.00,
-    ]);
-
-    // Test greeting
-    $greetingRes = $this->postJson(route('chatbot.message'), [
-        'message' => 'Hello hospital',
-    ]);
-    $greetingRes->assertOk();
-    $greetingRes->assertJsonStructure(['status', 'reply', 'suggestions']);
-    expect($greetingRes->json('status'))->toBe('success');
-
-    // Test doctor record inquiry
-    $doctorRes = $this->postJson(route('chatbot.message'), [
-        'message' => 'Show me the doctors available',
-    ]);
-    $doctorRes->assertOk();
-    expect($doctorRes->json('reply'))->toContain('Dr. Tariq Dent');
-
-    // Test medical triage suggestion
-    $symptomRes = $this->postJson(route('chatbot.message'), [
-        'message' => 'I have severe toothache and bleeding gums, what should I do?',
-    ]);
-    $symptomRes->assertOk();
-    expect($symptomRes->json('reply'))->toContain('Dental Surgery');
-    expect($symptomRes->json('reply'))->toContain('Dr. Tariq Dent');
-
-    // Test validation failure
-    $emptyRes = $this->postJson(route('chatbot.message'), [
-        'message' => '',
-    ]);
-    $emptyRes->assertStatus(422);
-});
-
 test('bootstrap and jquery assets are properly loaded in the layout', function () {
     $response = $this->get(route('welcome'));
 
@@ -626,7 +586,7 @@ test('hospital payments page dynamically displays expense categories from db and
     ]);
 });
 
-test('topbar displays whatsapp and email contacts and includes ai assistant widget', function () {
+test('topbar displays whatsapp and email contacts without chatbot widget', function () {
     $response = $this->get(route('welcome'));
 
     $response->assertOk();
@@ -640,14 +600,196 @@ test('topbar displays whatsapp and email contacts and includes ai assistant widg
     $response->assertSee('mailto:skpattan850911@gmail.com', false);
     $response->assertSee('bi-envelope-at-fill', false);
 
-    // AI Assistant Widget included
-    $response->assertSee('hms-chatbot-container', false);
-    $response->assertSee('hms-chatbot-launcher', false);
-    $response->assertSee('HMS Medical AI', false);
+    // Chatbot widget removed
+    $response->assertDontSee('hms-chatbot-container', false);
+    $response->assertDontSee('hms-chatbot-launcher', false);
+    $response->assertDontSee('HMS Medical AI', false);
 
     // Unnecessary dummy template elements are removed
     $response->assertDontSee('app-emailbox.html');
     $response->assertDontSee('app-to-do.html');
     $response->assertDontSee('Amelio Joly');
     $response->assertDontSee('Jhon Deo');
+});
+
+test('expenses can be filtered by from_date and to_date and displays PKR currency', function () {
+    Expense::create([
+        'date' => '2026-01-10',
+        'name' => 'Old January Expense',
+        'catagory' => 'Office',
+        'amount' => 500.00,
+    ]);
+
+    Expense::create([
+        'date' => '2026-02-15',
+        'name' => 'Mid February Expense',
+        'catagory' => 'Maintenance',
+        'amount' => 1500.00,
+    ]);
+
+    Expense::create([
+        'date' => '2026-03-20',
+        'name' => 'Late March Expense',
+        'catagory' => 'Fuel',
+        'amount' => 2500.00,
+    ]);
+
+    // 1. Unfiltered request sees all and uses PKR
+    $response = $this->get(route('expenses.index'));
+    $response->assertOk();
+    $response->assertSee('PKR 500.00');
+    $response->assertSee('PKR 1,500.00');
+    $response->assertSee('PKR 2,500.00');
+    $response->assertSee('Amount (PKR)');
+
+    // 2. Filter from 2026-02-01 to 2026-02-28
+    $filteredResponse = $this->get(route('expenses.index', [
+        'from_date' => '2026-02-01',
+        'to_date' => '2026-02-28',
+    ]));
+    $filteredResponse->assertOk();
+    $filteredResponse->assertSee('Mid February Expense');
+    $filteredResponse->assertDontSee('Old January Expense');
+    $filteredResponse->assertDontSee('Late March Expense');
+    $filteredResponse->assertSee('PKR 1,500.00');
+
+    // 3. Test Expenses PDF with from_date and to_date
+    $pdfResponse = $this->get(route('reports.expenses.pdf', [
+        'from_date' => '2026-02-01',
+        'to_date' => '2026-02-28',
+    ]));
+    $pdfResponse->assertOk();
+    expect($pdfResponse->headers->get('content-type'))->toBe('application/pdf');
+});
+
+test('alert system renders relevant colors and icons across blades', function () {
+    // Test success toast rendering
+    $responseSuccess = $this->withSession(['success' => 'Patient created successfully'])->get(route('welcome'));
+    $responseSuccess->assertOk();
+    $responseSuccess->assertSee('Patient created successfully');
+    $responseSuccess->assertSee('bi-check-circle-fill', false);
+    $responseSuccess->assertSee('#10b981', false);
+
+    // Test update toast rendering
+    $responseUpdate = $this->withSession(['update' => 'Record updated successfully'])->get(route('welcome'));
+    $responseUpdate->assertOk();
+    $responseUpdate->assertSee('Record updated successfully');
+    $responseUpdate->assertSee('bi-pencil-square', false);
+    $responseUpdate->assertSee('#2563eb', false);
+
+    // Test delete toast rendering
+    $responseDelete = $this->withSession(['delete' => 'Record deleted permanently'])->get(route('welcome'));
+    $responseDelete->assertOk();
+    $responseDelete->assertSee('Record deleted permanently');
+    $responseDelete->assertSee('bi-trash3-fill', false);
+    $responseDelete->assertSee('#dc2626', false);
+
+    // Test error toast rendering
+    $responseError = $this->withSession(['error' => 'Operation failed due to permission'])->get(route('welcome'));
+    $responseError->assertOk();
+    $responseError->assertSee('Operation failed due to permission');
+    $responseError->assertSee('bi-x-circle-fill', false);
+});
+
+test('all print buttons have meaningful descriptive names according to functionality', function () {
+    // Welcome / Dashboard
+    $welcome = $this->get(route('welcome'));
+    $welcome->assertSee('Print Appointments');
+    $welcome->assertSee('Print Expenses');
+
+    // Staff view
+    $staff = $this->get(route('staff.index'));
+    $staff->assertSee('Print Staff');
+
+    // Doctors view
+    $doctors = $this->get(route('doctors.index'));
+    $doctors->assertSee('Print Doctors');
+
+    // Expenses view
+    $expenses = $this->get(route('expenses.index'));
+    $expenses->assertSee('Print Expenses');
+
+    // Patients view
+    $patients = $this->get(route('patients.index'));
+    $patients->assertSee('Print Patients');
+
+    // Appointments view
+    $appointments = $this->get(route('appointment.index'));
+    $appointments->assertSee('Print Appointments');
+    $appointments->assertSee('Print Token');
+
+    // Hospital payments view
+    $payments = $this->get(route('hospital-payments'));
+    $payments->assertSee('Print Financial Statement');
+    $payments->assertSee('Print Expenses');
+    $payments->assertSee('Print Receipt');
+});
+
+test('hospital payments view does not contain automatic window print triggers and contains dues calculation elements', function () {
+    $patient = PatientHistory::create([
+        'name' => 'Kashif Ali',
+        'age' => 40,
+        'phone' => '03009876543',
+        'cnic' => '42101-1234567-1',
+        'due_amount' => 1500.00,
+        'wallet_amount' => 0.00,
+    ]);
+
+    $response = $this->get(route('hospital-payments'));
+    $response->assertOk();
+
+    // Verify it NEVER contains <body onload="window.print()"
+    $response->assertDontSee('<body onload="window.print()', false);
+    $response->assertDontSee('window.print(); window.close()', false);
+
+    // Verify calculation card and data-due attributes are present
+    $response->assertSee('id="modal_paid_amount"', false);
+    $response->assertSee('id="modal_calc_remaining_dues"', false);
+    $response->assertSee('id="modal_calc_prev_dues"', false);
+    $response->assertSee('data-due="1500"', false);
+    $response->assertSee('Real-time Dues &amp; Discount Calculation', false);
+});
+
+test('recording a partial payment with discount calculates and updates patient dues balance correctly', function () {
+    $patient = PatientHistory::create([
+        'name' => 'Rehan Siddiqui',
+        'age' => 35,
+        'phone' => '03121234567',
+        'cnic' => '42101-7654321-2',
+        'due_amount' => 500.00,
+        'wallet_amount' => 0.00,
+    ]);
+
+    // Gross: 3000, Discount: 500 => Net: 2500. Paid: 1000 => Remaining current bill due: 1500.
+    // Patient prior due (500) + Remaining current bill (1500) = 2000.
+    $paymentData = [
+        'category' => 'General Procedures',
+        'patient_id' => $patient->id,
+        'patient_name' => $patient->name,
+        'patient_phone' => $patient->phone,
+        'amount' => 3000.00,
+        'discount' => 500.00,
+        'paid_amount' => 1000.00,
+        'payment_method' => 'Cash',
+        'payment_date' => now()->toDateString(),
+        'status' => 'Partial',
+        'notes' => 'Dental extraction with partial payment',
+    ];
+
+    $response = $this->post(route('hospital-payments.store'), $paymentData);
+    $response->assertRedirect(route('hospital-payments'));
+
+    $this->assertDatabaseHas('hospital_payments', [
+        'category' => 'General Procedures',
+        'patient_id' => $patient->id,
+        'amount' => 3000.00,
+        'discount' => 500.00,
+        'net_amount' => 2500.00,
+        'paid_amount' => 1000.00,
+        'status' => 'Partial',
+    ]);
+
+    $patient->refresh();
+    // Prior 500 + New remaining due 1500 = 2000
+    expect((float) $patient->due_amount)->toBe(2000.00);
 });

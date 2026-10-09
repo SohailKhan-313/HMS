@@ -53,7 +53,7 @@ class ExpenseCatagoryController extends Controller
         $category = ExpenseCatagory::findOrFail($id);
         $category->update($request->validated());
 
-        return redirect()->route('category.index')->with('success', 'Category updated successfully.');
+        return redirect()->route('category.index')->with('update', 'Category updated successfully.');
     }
 
     /**
@@ -64,6 +64,6 @@ class ExpenseCatagoryController extends Controller
         $category = ExpenseCatagory::findOrFail($id);
         $category->delete();
 
-        return redirect()->route('category.index')->with('success', 'Category deleted successfully.');
+        return redirect()->route('category.index')->with('delete', 'Category deleted successfully.');
     }
 }

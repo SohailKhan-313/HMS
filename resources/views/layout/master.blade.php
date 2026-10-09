@@ -108,7 +108,7 @@
             </ul>
           </div>
 
-          <!-- Topbar Right Controls: WhatsApp, Email, AI Assistant & Profile -->
+          <!-- Topbar Right Controls: WhatsApp, Email & Profile -->
           <div class="top-navbar-right ms-auto">
             <ul class="navbar-nav align-items-center gap-2">
               <!-- WhatsApp Direct Contact Icon -->
@@ -133,17 +133,6 @@
                 </a>
               </li>
 
-              <!-- AI Medical Assistant Launcher Button -->
-              <li class="nav-item">
-                <button type="button" 
-                        class="btn btn-sm btn-dark d-flex align-items-center gap-1 rounded-pill px-2 px-md-3 shadow-sm" 
-                        onclick="if(typeof window.toggleHMSChatbot === 'function'){ window.toggleHMSChatbot(true); } else { document.getElementById('hms-chatbot-launcher')?.click(); }" 
-                        title="Open Hospital AI Assistant">
-                  <i class="bi bi-robot text-info fs-6"></i>
-                  <span class="font-12 fw-semibold d-none d-sm-inline">AI Assistant</span>
-                </button>
-              </li>
-
               <!-- Hospital User Profile Dropdown & Logout -->
               @auth
               <li class="nav-item dropdown dropdown-large ms-1">
@@ -153,7 +142,7 @@
                   </div>
                   <div class="d-none d-sm-block text-start lh-1">
                     <span class="font-12 fw-bold text-dark d-block">{{ auth()->user()->name }}</span>
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-10 text-uppercase py-0 px-1">{{ auth()->user()->role }}</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 font-10 text-uppercase py-0 px-1">{{ auth()->user()->role }}</span>
                   </div>
                   <i class="bi bi-chevron-down font-11 text-secondary"></i>
                 </a>
@@ -166,7 +155,7 @@
                       <div class="overflow-hidden">
                         <h6 class="mb-0 font-13 fw-bold text-dark text-truncate">{{ auth()->user()->name }}</h6>
                         <small class="text-muted font-11 text-truncate d-block">{{ auth()->user()->email }}</small>
-                        <span class="badge bg-secondary-subtle text-secondary font-10 text-uppercase mt-1">{{ auth()->user()->role }}</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 font-10 text-uppercase mt-1">{{ auth()->user()->role }}</span>
                       </div>
                     </div>
                   </li>
@@ -242,16 +231,6 @@
           </a>
         </li>
 
-        @if(!auth()->check() || auth()->user()->canManageUsers())
-        <!-- Users & Role Access (Admin Only) -->
-        <li class="{{ request()->routeIs('users.*') ? 'mm-active' : '' }}">
-          <a href="{{ route('users.index') }}">
-            <div class="parent-icon"><i class="bi bi-shield-lock text-primary"></i></div>
-            <div class="menu-title">Users & Roles</div>
-          </a>
-        </li>
-        @endif
-
         @if(!auth()->check() || auth()->user()->canAccessAppointments())
         <!-- Appointments -->
         <li class="{{ request()->routeIs('appointment.*') ? 'mm-active' : '' }}">
@@ -323,47 +302,57 @@
         </li>
         @endif
 
-        <li class="menu-label text-uppercase text-secondary mt-2 mb-1 px-3 font-11">Reports & Downloads</li>
+        <li class="menu-label text-uppercase text-secondary mt-2 mb-1 px-3 font-11">Reports & Printing</li>
 
-        <!-- PDF Export Quick Center -->
+        <!-- Print Reports Quick Center -->
         <li>
           <a href="javascript:;" class="has-arrow">
-            <div class="parent-icon"><i class="bi bi-file-earmark-pdf text-danger"></i></div>
-            <div class="menu-title">PDF Reports</div>
+            <div class="parent-icon"><i class="bi bi-printer text-danger"></i></div>
+            <div class="menu-title">Print Reports</div>
           </a>
           <ul>
             @if(!auth()->check() || auth()->user()->canAccessPatients())
             <li>
-              <a href="{{ route('reports.patients.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Patients Directory (PDF)</a>
+              <a href="{{ route('reports.patients.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Print Patients</a>
             </li>
             @endif
             @if(!auth()->check() || auth()->user()->canAccessAppointments())
             <li>
-              <a href="{{ route('reports.appointments.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Appointments List (PDF)</a>
+              <a href="{{ route('reports.appointments.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Print Appointments</a>
             </li>
             @endif
             @if(!auth()->check() || auth()->user()->isDoctor() || auth()->user()->canManageDoctors())
             <li>
-              <a href="{{ route('reports.doctors.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Doctors Roster (PDF)</a>
+              <a href="{{ route('reports.doctors.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Print Doctors</a>
             </li>
             @endif
             @if(!auth()->check() || auth()->user()->canManageStaff())
             <li>
-              <a href="{{ route('reports.staff.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Staff Directory (PDF)</a>
+              <a href="{{ route('reports.staff.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Print Staff</a>
             </li>
             @endif
             @if(!auth()->check() || auth()->user()->canAccessExpenses())
             <li>
-              <a href="{{ route('reports.expenses.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Expenses Audit (PDF)</a>
+              <a href="{{ route('reports.expenses.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Print Expenses</a>
             </li>
             @endif
             @if(!auth()->check() || auth()->user()->canAccessPayments())
             <li>
-              <a href="{{ route('reports.payments.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Payments Audit (PDF)</a>
+              <a href="{{ route('reports.payments.pdf') }}" target="_blank"><i class="bi bi-arrow-right-short"></i>Print Financial Statement</a>
             </li>
             @endif
           </ul>
         </li>
+
+        @if(!auth()->check() || auth()->user()->canManageUsers())
+        <!-- Users & Role Access (Admin Only) -->
+        <li class="{{ request()->routeIs('users.*') ? 'mm-active' : '' }}">
+          <a href="{{ route('users.index') }}">
+            <div class="parent-icon"><i class="bi bi-shield-lock text-primary"></i></div>
+            <div class="menu-title">Users & Roles</div>
+          </a>
+        </li>
+        @endif
 
       </ul>
 
@@ -371,29 +360,8 @@
     </aside>
     <!--end sidebar -->
 
-    <!-- Global Flash Alerts -->
-    @if(session('success'))
-    <div class="container-fluid pt-3 px-4">
-      <div class="alert alert-success border-0 bg-success alert-dismissible fade show text-white shadow-sm mb-0">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-check-circle-fill fs-5 me-2"></i>
-          <div>{{ session('success') }}</div>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    </div>
-    @endif
-    @if(session('error'))
-    <div class="container-fluid pt-3 px-4">
-      <div class="alert alert-danger border-0 bg-danger alert-dismissible fade show text-white shadow-sm mb-0">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
-          <div>{{ session('error') }}</div>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    </div>
-    @endif
+    <!-- Global Unified Alerts & Toasts -->
+    @include('partials.alerts')
 
     <!--start content-->
     @yield('content')
@@ -501,8 +469,6 @@
         new PerfectScrollbar('.top-sellers-list');
     }
   </script>
-
-  @include('partials.chatbot')
 
   @stack('scripts')
 

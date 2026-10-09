@@ -1744,3 +1744,232 @@ a {
 		display: none
 	}
 }
+
+/* ========================================================
+   GLOBAL BADGE TEXT VISIBILITY & CONTRAST RULES
+   ======================================================== */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+/* Ensure solid badges (WITHOUT opacity classes and WITHOUT explicit text- classes) have white text */
+.badge.bg-primary:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-success:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-danger:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-secondary:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-dark:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-purple:not([class*="bg-opacity"]):not([class*="text-"]) {
+    color: #ffffff !important;
+}
+
+/* Ensure solid badges with warning/info/light backgrounds have dark text */
+.badge.bg-warning:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-light-warning:not([class*="bg-opacity"]):not([class*="text-"]) {
+    color: #1f2937 !important;
+}
+
+.badge.bg-info:not([class*="bg-opacity"]):not([class*="text-"]),
+.badge.bg-light-info:not([class*="bg-opacity"]):not([class*="text-"]) {
+    color: #0c4a6e !important;
+}
+
+.badge.bg-light:not([class*="text-"]) {
+    color: #1f2937 !important;
+}
+
+/* ========================================================
+   BACKGROUND OPACITY SUPPORT
+   Overrides bootstrap-extended solid colors when bg-opacity is used
+   ======================================================== */
+.bg-danger.bg-opacity-10,
+.bg-opacity-10.bg-danger {
+    background-color: rgba(220, 38, 38, 0.12) !important;
+}
+.bg-danger.bg-opacity-25,
+.bg-opacity-25.bg-danger {
+    background-color: rgba(220, 38, 38, 0.22) !important;
+}
+.bg-danger.bg-opacity-50 {
+    background-color: rgba(220, 38, 38, 0.5) !important;
+}
+
+.bg-primary.bg-opacity-10,
+.bg-opacity-10.bg-primary {
+    background-color: rgba(37, 99, 235, 0.12) !important;
+}
+.bg-primary.bg-opacity-25,
+.bg-opacity-25.bg-primary {
+    background-color: rgba(37, 99, 235, 0.22) !important;
+}
+
+.bg-success.bg-opacity-10,
+.bg-opacity-10.bg-success {
+    background-color: rgba(22, 163, 74, 0.12) !important;
+}
+.bg-success.bg-opacity-25,
+.bg-opacity-25.bg-success {
+    background-color: rgba(22, 163, 74, 0.22) !important;
+}
+
+.bg-warning.bg-opacity-10,
+.bg-opacity-10.bg-warning {
+    background-color: rgba(245, 158, 11, 0.16) !important;
+}
+.bg-warning.bg-opacity-25,
+.bg-opacity-25.bg-warning {
+    background-color: rgba(245, 158, 11, 0.28) !important;
+}
+
+.bg-info.bg-opacity-10,
+.bg-opacity-10.bg-info {
+    background-color: rgba(2, 132, 199, 0.12) !important;
+}
+.bg-info.bg-opacity-25,
+.bg-opacity-25.bg-info {
+    background-color: rgba(2, 132, 199, 0.25) !important;
+}
+
+.bg-secondary.bg-opacity-10,
+.bg-opacity-10.bg-secondary {
+    background-color: rgba(100, 116, 139, 0.12) !important;
+}
+.bg-secondary.bg-opacity-25,
+.bg-opacity-25.bg-secondary {
+    background-color: rgba(100, 116, 139, 0.22) !important;
+}
+
+.bg-purple.bg-opacity-10,
+.bg-opacity-10.bg-purple {
+    background-color: rgba(124, 58, 237, 0.12) !important;
+}
+.bg-purple.bg-opacity-25,
+.bg-opacity-25.bg-purple {
+    background-color: rgba(124, 58, 237, 0.22) !important;
+}
+
+/* ========================================================
+   BORDER OPACITY SUPPORT
+   ======================================================== */
+.border-danger.border-opacity-25 {
+    border-color: rgba(220, 38, 38, 0.3) !important;
+}
+.border-danger.border-opacity-50 {
+    border-color: rgba(220, 38, 38, 0.5) !important;
+}
+.border-primary.border-opacity-25 {
+    border-color: rgba(37, 99, 235, 0.3) !important;
+}
+.border-success.border-opacity-25 {
+    border-color: rgba(22, 163, 74, 0.3) !important;
+}
+.border-warning.border-opacity-25 {
+    border-color: rgba(245, 158, 11, 0.35) !important;
+}
+.border-warning.border-opacity-50 {
+    border-color: rgba(245, 158, 11, 0.55) !important;
+}
+.border-info.border-opacity-25 {
+    border-color: rgba(2, 132, 199, 0.3) !important;
+}
+.border-secondary.border-opacity-25 {
+    border-color: rgba(100, 116, 139, 0.3) !important;
+}
+.border-purple.border-opacity-25 {
+    border-color: rgba(124, 58, 237, 0.3) !important;
+}
+
+/* ========================================================
+   VIBRANT HIGH-CONTRAST TEXT & ICON COLORS
+   Ensure colored text & icons are always crisp, legible and visible
+   ======================================================== */
+.text-danger,
+.badge.text-danger,
+.badge.text-danger i {
+    color: #dc2626 !important;
+}
+
+.text-primary,
+.badge.text-primary,
+.badge.text-primary i {
+    color: #2563eb !important;
+}
+
+.text-success,
+.badge.text-success,
+.badge.text-success i {
+    color: #16a34a !important;
+}
+
+.text-warning,
+.badge.text-warning,
+.badge.text-warning i {
+    color: #b45309 !important;
+}
+
+.text-info,
+.badge.text-info,
+.badge.text-info i {
+    color: #0284c7 !important;
+}
+
+.text-secondary,
+.badge.text-secondary,
+.badge.text-secondary i {
+    color: #475569 !important;
+}
+
+.text-purple,
+.badge.text-purple,
+.badge.text-purple i {
+    color: #7c3aed !important;
+}
+
+.badge.text-dark {
+    color: #111827 !important;
+}
+
+.badge.text-white {
+    color: #ffffff !important;
+}
+
+/* Backward compatibility for Bootstrap 5.3 subtle classes */
+.bg-primary-subtle {
+    background-color: rgba(37, 99, 235, 0.12) !important;
+}
+.border-primary-subtle {
+    border-color: rgba(37, 99, 235, 0.3) !important;
+}
+.bg-success-subtle {
+    background-color: rgba(22, 163, 74, 0.12) !important;
+}
+.border-success-subtle {
+    border-color: rgba(22, 163, 74, 0.3) !important;
+}
+.bg-danger-subtle {
+    background-color: rgba(220, 38, 38, 0.12) !important;
+}
+.border-danger-subtle {
+    border-color: rgba(220, 38, 38, 0.3) !important;
+}
+.bg-warning-subtle {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+}
+.border-warning-subtle {
+    border-color: rgba(245, 158, 11, 0.45) !important;
+}
+.text-warning-emphasis {
+    color: #92400e !important;
+}
+.bg-info-subtle {
+    background-color: rgba(2, 132, 199, 0.14) !important;
+}
+.border-info-subtle {
+    border-color: rgba(2, 132, 199, 0.3) !important;
+}
+.bg-secondary-subtle {
+    background-color: rgba(100, 116, 139, 0.12) !important;
+}
+.border-secondary-subtle {
+    border-color: rgba(100, 116, 139, 0.3) !important;
+}

@@ -117,7 +117,7 @@ class AppointmentController extends Controller
         $appointment->update($request->validated());
 
         return redirect()->route('appointment.index')
-            ->with('success', 'Appointment updated successfully.');
+            ->with('update', 'Appointment updated successfully.');
     }
 
     /**
@@ -129,7 +129,7 @@ class AppointmentController extends Controller
         $appointment->delete();
 
         return redirect()->route('appointment.index')
-            ->with('success', 'Appointment deleted successfully.');
+            ->with('delete', 'Appointment deleted successfully.');
     }
 
     /**
@@ -143,6 +143,7 @@ class AppointmentController extends Controller
             ->update(['status' => 'Cancelled']);
 
         return redirect()->route('appointment.index')
-            ->with('success', "{$affected} appointment(s) for {$selectedDate} have been marked as Cancelled.");
+            ->with('success', "{$affected} appointment(s) for {$selectedDate} have been marked as Cancelled.")
+            ->with('delete', "{$affected} appointment(s) for {$selectedDate} have been marked as Cancelled.");
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Expense;
 use App\Models\ExpenseCatagory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ExpenseController extends Controller
@@ -15,12 +16,51 @@ class ExpenseController extends Controller
     /**
      * Display a listing of expenses.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $categories = ExpenseCatagory::query()->orderBy('name')->get();
-        $expenses = Expense::query()->latest()->get();
 
-        return view('expenses.expanse', compact('expenses', 'categories'));
+        $fromDate = $request->query('from_date');
+        $toDate = $request->query('to_date');
+        $selectedCategory = $request->query('category', 'all');
+        $search = $request->query('search');
+
+        $query = Expense::query();
+
+        if ($fromDate) {
+            $query->whereDate('date', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate('date', '<=', $toDate);
+        }
+
+        if ($selectedCategory && $selectedCategory !== 'all') {
+            $query->where('catagory', $selectedCategory);
+        }
+
+        if ($search) {
+            $term = '%'.$search.'%';
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', $term)
+                    ->orWhere('catagory', 'like', $term);
+            });
+        }
+
+        $expenses = $query->orderByDesc('date')->orderByDesc('id')->get();
+        $totalFilteredAmount = $expenses->sum('amount');
+        $totalCount = $expenses->count();
+
+        return view('expenses.expanse', compact(
+            'expenses',
+            'categories',
+            'fromDate',
+            'toDate',
+            'selectedCategory',
+            'search',
+            'totalFilteredAmount',
+            'totalCount'
+        ));
     }
 
     /**
@@ -63,7 +103,7 @@ class ExpenseController extends Controller
         $expense = Expense::findOrFail($id);
         $expense->update($request->validated());
 
-        return redirect()->route('expenses.index')->with('success', 'Expense updated successfully.');
+        return redirect()->route('expenses.index')->with('update', 'Expense updated successfully.');
     }
 
     /**
@@ -74,6 +114,6 @@ class ExpenseController extends Controller
         $expense = Expense::findOrFail($id);
         $expense->delete();
 
-        return redirect()->route('expenses.index')->with('success', 'Expense deleted successfully.');
+        return redirect()->route('expenses.index')->with('delete', 'Expense deleted successfully.');
     }
 }

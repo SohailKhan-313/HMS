@@ -9,18 +9,11 @@
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 rounded-pill fw-semibold">
-                            <i class="bi bi-hospital me-1"></i> Hospital Operations
-                        </span>
                         <span class="text-secondary font-13"><i class="bi bi-calendar3 me-1"></i> {{ \Carbon\Carbon::now()->format('l, d F Y') }}</span>
                     </div>
                     <h4 class="mb-0 fw-bold text-dark">Hospital Management Dashboard</h4>
-                    <p class="mb-0 text-muted font-13">Real-time overview of patients, daily appointments, medical roster, and clinical finances.</p>
                 </div>
                 <div class="d-flex align-items-center flex-wrap gap-2">
-                    <button type="button" class="btn btn-dark btn-sm d-flex align-items-center gap-1 shadow-sm" onclick="if(typeof window.toggleHMSChatbot === 'function'){ window.toggleHMSChatbot(true); } else { document.getElementById('hms-chatbot-launcher')?.click(); }">
-                        <i class="bi bi-robot text-info"></i> AI Assistant
-                    </button>
                     @if(!auth()->check() || auth()->user()->canAccessAppointments())
                     <a href="{{ route('appointment.index') }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
                         <i class="bi bi-calendar-plus"></i> Appointments
@@ -43,7 +36,7 @@
                     @endif
                     @if(!auth()->check() || auth()->user()->canAccessAppointments())
                     <a href="{{ route('reports.appointments.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
-                        <i class="bi bi-file-earmark-pdf"></i> Print Registry (PDF)
+                        <i class="bi bi-printer me-1"></i> Print Appointments
                     </a>
                     @endif
                 </div>
@@ -62,8 +55,8 @@
                             <p class="mb-1 text-secondary font-13 text-uppercase fw-semibold">Total Patients</p>
                             <h3 class="mb-1 fw-bold text-dark">{{ number_format($totalPatients) }}</h3>
                             <p class="mb-0 font-12 text-muted">
-                                <span class="text-danger fw-semibold">Due: Rs. {{ number_format($totalDueAmount, 0) }}</span> · 
-                                <span class="text-success fw-semibold">Credit: Rs. {{ number_format($totalWalletAmount, 0) }}</span>
+                                <span class="text-danger fw-semibold">Due: PKR {{ number_format($totalDueAmount, 0) }}</span> · 
+                                <span class="text-success fw-semibold">Credit: PKR {{ number_format($totalWalletAmount, 0) }}</span>
                             </p>
                         </div>
                         <div class="widget-icon-large bg-gradient-purple text-white ms-auto shadow-sm">
@@ -93,7 +86,7 @@
                             <h3 class="mb-1 fw-bold text-dark">{{ number_format($todayAppointments) }}</h3>
                             <p class="mb-0 font-12 text-muted">
                                 <span class="badge bg-warning text-dark">{{ $pendingAppointments }} Pending</span>
-                                <span class="badge bg-success ms-1">{{ $completedAppointments }} Done</span>
+                                <span class="badge bg-success text-white ms-1">{{ $completedAppointments }} Done</span>
                             </p>
                         </div>
                         <div class="widget-icon-large bg-gradient-info text-white ms-auto shadow-sm">
@@ -122,7 +115,7 @@
                             <p class="mb-1 text-secondary font-13 text-uppercase fw-semibold">Medical Specialists</p>
                             <h3 class="mb-1 fw-bold text-dark">{{ number_format($totalDoctors) }}</h3>
                             <p class="mb-0 font-12 text-success fw-semibold">
-                                <i class="bi bi-cash-coin me-1"></i> Consultations: Rs. {{ number_format($totalRevenue, 0) }}
+                                <i class="bi bi-cash-coin me-1"></i> Consultations: PKR {{ number_format($totalRevenue, 0) }}
                             </p>
                         </div>
                         <div class="widget-icon-large bg-gradient-danger text-white ms-auto shadow-sm">
@@ -147,7 +140,7 @@
                             <p class="mb-1 text-secondary font-13 text-uppercase fw-semibold">Hospital Staff</p>
                             <h3 class="mb-1 fw-bold text-dark">{{ number_format($totalStaff) }}</h3>
                             <p class="mb-0 font-12 text-muted">
-                                <span class="text-danger fw-semibold">Total Expenses: Rs. {{ number_format($totalExpenses, 0) }}</span>
+                                <span class="text-danger fw-semibold">Total Expenses: PKR {{ number_format($totalExpenses, 0) }}</span>
                             </p>
                         </div>
                         <div class="widget-icon-large bg-gradient-success text-white ms-auto shadow-sm">
@@ -167,39 +160,6 @@
                     @else
                     <span class="font-12 text-muted fw-semibold">Hospital Operations</span>
                     @endif
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI Medical Assistant Quick Console on Dashboard -->
-    <div class="card border-0 shadow-sm radius-10 mb-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-        <div class="card-body p-3 p-md-4 text-white">
-            <div class="row align-items-center g-3">
-                <div class="col-12 col-lg-7">
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <span class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 px-2 py-1 rounded-pill font-11">
-                            <i class="bi bi-cpu me-1"></i> HMS Intelligence
-                        </span>
-                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-2 py-1 rounded-pill font-11">
-                            <i class="bi bi-check-circle me-1"></i> Live Records &amp; Medical Triage
-                        </span>
-                    </div>
-                    <h5 class="fw-bold mb-1 text-white">AI Hospital Assistant &amp; Medical Suggestions</h5>
-                    <p class="text-white-50 font-13 mb-0">Ask about available doctors, consultation fees, patient dues, or describe symptoms for preliminary triage and doctor recommendations.</p>
-                </div>
-                <div class="col-12 col-lg-5">
-                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
-                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill font-12" onclick="openChatWithPrompt('Show available doctors and consultation fees')">
-                            👨‍⚕️ Available Doctors
-                        </button>
-                        <button type="button" class="btn btn-outline-light btn-sm rounded-pill font-12" onclick="openChatWithPrompt('What are today appointments?')">
-                            📅 Today's Schedule
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm rounded-pill font-12 fw-semibold shadow-sm" onclick="if(typeof window.toggleHMSChatbot === 'function'){ window.toggleHMSChatbot(true); } else { document.getElementById('hms-chatbot-launcher')?.click(); }">
-                            <i class="bi bi-chat-dots-fill me-1"></i> Open AI Assistant
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -238,7 +198,7 @@
                     <ul class="list-group list-group-flush mt-3 font-13">
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
                             <span><i class="bi bi-check-circle-fill text-success me-2"></i> Completed Consultations</span>
-                            <span class="badge bg-success rounded-pill">{{ $completedAppointments }}</span>
+                            <span class="badge bg-success text-white rounded-pill">{{ $completedAppointments }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
                             <span><i class="bi bi-hourglass-split text-warning me-2"></i> Pending Patient Visits</span>
@@ -246,11 +206,11 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
                             <span><i class="bi bi-hospital text-info me-2"></i> Inpatient / Admitted</span>
-                            <span class="badge bg-info rounded-pill">{{ $admittedAppointments }}</span>
+                            <span class="badge bg-info text-dark rounded-pill">{{ $admittedAppointments }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent">
                             <span><i class="bi bi-x-circle-fill text-danger me-2"></i> Cancelled Appointments</span>
-                            <span class="badge bg-danger rounded-pill">{{ $cancelledAppointments }}</span>
+                            <span class="badge bg-danger text-white rounded-pill">{{ $cancelledAppointments }}</span>
                         </li>
                     </ul>
                 </div>
@@ -316,18 +276,18 @@
                                         </td>
                                         <td>
                                             @if($apt->status == 'Completed')
-                                                <span class="badge bg-success-subtle text-success border border-success border-opacity-25 px-2 py-1 rounded-pill">Completed</span>
+                                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 rounded-pill">Completed</span>
                                             @elseif($apt->status == 'Cancelled')
-                                                <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-2 py-1 rounded-pill">Cancelled</span>
+                                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 rounded-pill">Cancelled</span>
                                             @elseif($apt->status == 'Admitted')
-                                                <span class="badge bg-info-subtle text-info border border-info border-opacity-25 px-2 py-1 rounded-pill">Admitted</span>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1 rounded-pill">Admitted</span>
                                             @else
-                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning border-opacity-25 px-2 py-1 rounded-pill">Pending</span>
+                                                <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-2 py-1 rounded-pill">Pending</span>
                                             @endif
                                         </td>
                                         <td class="text-end pe-3">
-                                            <a href="{{ route('pdf.appointment', $apt->id) }}" target="_blank" class="btn btn-outline-danger btn-sm p-1 px-2" title="Print Appointment PDF">
-                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            <a href="{{ route('pdf.appointment', $apt->id) }}" target="_blank" class="btn btn-outline-danger btn-sm p-1 px-2" title="Print Token">
+                                                <i class="bi bi-printer"></i>
                                             </a>
                                         </td>
                                     </tr>
@@ -376,7 +336,7 @@
                                 </div>
                                 <div class="text-end">
                                     <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
-                                        Rs. {{ number_format($doc->fee, 0) }}
+                                        PKR {{ number_format($doc->fee, 0) }}
                                     </span>
                                     <div class="font-11 text-muted mt-1">{{ $doc->appointments_count }} visits</div>
                                 </div>
@@ -402,7 +362,7 @@
             </div>
             <div class="d-flex gap-2">
                 <a href="{{ route('reports.expenses.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
-                    <i class="bi bi-file-earmark-pdf"></i> Expenses Audit (PDF)
+                    <i class="bi bi-printer me-1"></i> Print Expenses
                 </a>
                 <a href="{{ route('expenses.index') }}" class="btn btn-outline-secondary btn-sm">
                     Manage Expenses <i class="bi bi-arrow-right"></i>
@@ -418,7 +378,7 @@
                             <th>Description / Expense Title</th>
                             <th>Category</th>
                             <th>Date</th>
-                            <th class="text-end pe-3">Amount</th>
+                            <th class="text-end pe-3">Amount (PKR)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -437,7 +397,7 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-3 fw-bold text-danger">
-                                    Rs. {{ number_format($exp->amount, 2) }}
+                                    PKR {{ number_format($exp->amount, 2) }}
                                 </td>
                             </tr>
                         @empty

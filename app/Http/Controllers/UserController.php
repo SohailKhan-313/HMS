@@ -99,7 +99,7 @@ class UserController extends Controller
         $user->update($data);
 
         return redirect()->route('users.index')
-            ->with('success', "User account '{$user->name}' updated successfully.");
+            ->with('update', "User account '{$user->name}' updated successfully.");
     }
 
     /**
@@ -124,7 +124,7 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')
-            ->with('success', "User '{$userName}' has been deleted from the hospital system.");
+            ->with('delete', "User '{$userName}' has been deleted from the hospital system.");
     }
 
     /**

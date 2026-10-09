@@ -227,63 +227,7 @@
                 </div>
             </div>
 
-            <!-- TOAST NOTIFICATIONS (same as Staff) -->
-            <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
-                @php
-                $toastMessage = '';
-                $toastIcon = '';
-                $textColor = '';
-                @endphp
 
-                @if(session('success') || session('update') || session('delete'))
-                @php
-                if(session('success')) {
-                $toastMessage = session('success');
-                $toastIcon = 'bi-check-circle-fill text-success';
-                $textColor = 'text-success';
-                } elseif(session('update')) {
-                $toastMessage = session('update');
-                $toastIcon = 'bi-pencil-square text-primary';
-                $textColor = 'text-primary';
-                } elseif(session('delete')) {
-                $toastMessage = session('delete');
-                $toastIcon = 'bi-trash-fill text-danger';
-                $textColor = 'text-danger';
-                }
-                @endphp
-
-                <div id="actionToast" class="toast border-0 shadow-lg bg-white" role="alert">
-                    <div class="toast-body">
-                        <div class="d-flex align-items-center">
-                            <div class="fs-3">
-                                <i class="bi {{ $toastIcon }}"></i>
-                            </div>
-                            <div class="ms-3">
-                                <div class="{{ $textColor }}">
-                                    {{ $toastMessage }}
-                                </div>
-                            </div>
-                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-
-            @if(session('success') || session('update') || session('delete'))
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    const toastEl = document.getElementById('actionToast');
-                    if (toastEl) {
-                        const toast = new bootstrap.Toast(toastEl, {
-                            delay: 2000,
-                            autohide: true
-                        });
-                        toast.show();
-                    }
-                });
-            </script>
-            @endif
 
             <!-- TABLE (same layout as Staff) -->
             <div class="card-body p-0">
@@ -304,89 +248,14 @@
                                 <td><span class="name-badge">{{ $category->name }}</span></td>
                                 <td><span class="name-badge">{{ $category->description }}</span></td>
                                 <td>
-                                    <a href="#" class="action-icon" data-bs-toggle="modal" data-bs-target="#editModal{{ $category->id }}">
+                                    <a href="#" class="action-icon" data-bs-toggle="modal" data-bs-target="#editModal{{ $category->id }}" title="Edit Category">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="#" class="action-icon" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $category->id }}">
+                                    <a href="#" class="action-icon text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $category->id }}" title="Delete Category">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </td>
                             </tr>
-
-                            <!-- EDIT MODAL (Staff style) -->
-                            <div class="modal fade" id="editModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-lg modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">
-                                                <i class="bi bi-pencil-square me-2"></i>
-                                                Edit Category – {{ $category->name }}
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form action="{{ route('category.update', $category->id) }}" method="POST" id="editForm{{ $category->id }}">
-                                                @csrf
-                                                <div class="row g-4">
-                                                    <div class="col-md-12">
-                                                        <label class="form-label"><i class="bi bi-tag me-2"></i>Category Name*</label>
-                                                        <input type="text" name="name" value="{{ $category->name }}" class="form-control" required>
-                                                    </div>
-                                                    <div class="col-md-12">
-                                                        <label class="form-label"><i class="bi bi-card-text me-2"></i>Description</label>
-                                                        <input type="text" name="description" value="{{ $category->description }}" class="form-control" required>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
-                                                <i class="bi bi-x-lg me-2"></i>Cancel
-                                            </button>
-                                            <button type="submit" form="editForm{{ $category->id }}" class="btn btn-save">
-                                                <i class="bi bi-check-lg me-2"></i>Update Category
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- DELETE MODAL (Staff style) -->
-                            <div class="modal fade delete-modal" id="deleteModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">
-                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                                Confirm Delete
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body text-center">
-                                            <i class="bi bi-tag-x-fill delete-icon"></i>
-                                            <h4 class="mb-3">Are you sure?</h4>
-                                            <p class="text-muted mb-0">
-                                                You are about to delete category <strong>{{ $category->name }}</strong>.
-                                            </p>
-                                            <p class="text-muted">This action cannot be undone.</p>
-                                        </div>
-                                        <div class="modal-footer justify-content-center">
-                                            <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
-                                                    <i class="bi bi-x-lg me-2"></i>No, Keep Category
-                                                </button>
-                                                <form action="{{ route('category.delete', $category->id) }}" method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-delete">
-                                                        <i class="bi bi-trash me-2"></i>Yes, Delete Category
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             @endforeach
                         </tbody>
                     </table>
@@ -405,6 +274,83 @@
 
         </div>
     </div>
+
+    @foreach($categories as $category)
+        <!-- EDIT MODAL -->
+        <div class="modal fade" id="editModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            Edit Category – {{ $category->name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ route('category.update', $category->id) }}" method="POST" id="editForm{{ $category->id }}">
+                            @csrf
+                            <div class="row g-4">
+                                <div class="col-md-12">
+                                    <label class="form-label"><i class="bi bi-tag me-2"></i>Category Name*</label>
+                                    <input type="text" name="name" value="{{ $category->name }}" class="form-control" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label"><i class="bi bi-card-text me-2"></i>Description</label>
+                                    <input type="text" name="description" value="{{ $category->description }}" class="form-control" required>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-2"></i>Cancel
+                        </button>
+                        <button type="submit" form="editForm{{ $category->id }}" class="btn btn-save">
+                            <i class="bi bi-check-lg me-2"></i>Update Category
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELETE MODAL -->
+        <div class="modal fade delete-modal" id="deleteModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Confirm Delete
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <i class="bi bi-tag-x-fill delete-icon"></i>
+                        <h4 class="mb-3">Are you sure?</h4>
+                        <p class="text-muted mb-0">
+                            You are about to delete category <strong>{{ $category->name }}</strong>.
+                        </p>
+                        <p class="text-muted">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                                <i class="bi bi-x-lg me-2"></i>No, Keep Category
+                            </button>
+                            <form action="{{ route('category.delete', $category->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-delete">
+                                    <i class="bi bi-trash me-2"></i>Yes, Delete Category
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     <!-- ADD MODAL (Staff style) -->
     <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">

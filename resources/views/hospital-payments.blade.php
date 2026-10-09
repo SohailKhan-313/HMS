@@ -4,41 +4,13 @@
 <main class="page-content">
 <div class="container-fluid px-3 px-md-4">
 
-    <!-- Flash Alerts -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm mb-4" role="alert">
-            <i class="bi bi-check-circle-fill fs-5 text-success"></i>
-            <div>{{ session('success') }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm mb-4" role="alert">
-            <div class="d-flex align-items-center gap-2 mb-1 fw-bold">
-                <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
-                <span>Please correct the following errors:</span>
-            </div>
-            <ul class="mb-0 ps-3 font-13">
-                @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     <!-- ========== TOP HEADER & FINANCIAL CONTROLS ========== -->
     <div class="card radius-10 border-0 shadow-sm mb-4">
         <div class="card-header bg-transparent py-3">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 24px;">
-                        <i class="bi bi-wallet2"></i>
-                    </div>
                     <div>
                         <h4 class="mb-0 fw-bold text-dark">Hospital Payments &amp; Financial Overview</h4>
-                        <small class="text-muted">Multi-category revenue tracking, pharmacy, consultations, procedures, lab billing, and custom payments</small>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -46,7 +18,7 @@
                         <i class="bi bi-plus-circle-fill"></i> Record Payment
                     </button>
                     <a href="{{ route('reports.payments.pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
-                        <i class="bi bi-file-earmark-pdf"></i> Financial Statement (PDF)
+                        <i class="bi bi-printer me-1"></i> Print Financial Statement
                     </a>
                     <a href="{{ route('hospital-payments') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
                         <i class="bi bi-arrow-counterclockwise"></i> Reset
@@ -110,38 +82,38 @@
                             <span class="text-uppercase font-12 fw-bold text-success">Total Sales &amp; Billing</span>
                             <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-cash-stack"></i> Gross Collections</span>
                         </div>
-                        <h3 class="fw-bold text-dark mb-3">Rs. {{ number_format($totalSales, 0) }}</h3>
+                        <h3 class="fw-bold text-dark mb-3">PKR {{ number_format($totalSales, 0) }}</h3>
                         <ul class="list-unstyled mb-0 font-13">
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-person-badge text-primary font-12"></i> Consultation Billing
                                 </span>
-                                <span class="fw-bold text-dark">Rs. {{ number_format($consultationSales, 0) }}</span>
+                                <span class="fw-bold text-dark">PKR {{ number_format($consultationSales, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-capsule text-info font-12"></i> Pharmacy / Medicines
                                 </span>
-                                <span class="{{ $medicineSales > 0 ? 'fw-bold text-info' : 'text-muted' }}">Rs. {{ number_format($medicineSales, 0) }}</span>
+                                <span class="{{ $medicineSales > 0 ? 'fw-bold text-info' : 'text-muted' }}">PKR {{ number_format($medicineSales, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-bandaid text-purple font-12"></i> General Procedures
                                 </span>
-                                <span class="{{ $procedureSales > 0 ? 'fw-bold text-dark' : 'text-muted' }}">Rs. {{ number_format($procedureSales, 0) }}</span>
+                                <span class="{{ $procedureSales > 0 ? 'fw-bold text-dark' : 'text-muted' }}">PKR {{ number_format($procedureSales, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-virus text-warning font-12"></i> Diagnostics / Lab
                                 </span>
-                                <span class="{{ $labSales > 0 ? 'fw-bold text-warning-emphasis' : 'text-muted' }}">Rs. {{ number_format($labSales, 0) }}</span>
+                                <span class="{{ $labSales > 0 ? 'fw-bold text-warning-emphasis' : 'text-muted' }}">PKR {{ number_format($labSales, 0) }}</span>
                             </li>
                             @if($emergencySales > 0)
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-hospital text-danger font-12"></i> Emergency Care
                                 </span>
-                                <span class="fw-bold text-danger">Rs. {{ number_format($emergencySales, 0) }}</span>
+                                <span class="fw-bold text-danger">PKR {{ number_format($emergencySales, 0) }}</span>
                             </li>
                             @endif
                             @foreach($customCategorySales as $cName => $cTotal)
@@ -149,18 +121,18 @@
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-tag-fill text-primary font-12"></i> {{ $cName }}
                                 </span>
-                                <span class="fw-bold text-dark">Rs. {{ number_format($cTotal, 0) }}</span>
+                                <span class="fw-bold text-dark">PKR {{ number_format($cTotal, 0) }}</span>
                             </li>
                             @endforeach
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary d-flex align-items-center gap-1">
                                     <i class="bi bi-tag-fill text-danger font-12"></i> Total Discounts Given
                                 </span>
-                                <span class="text-danger fw-semibold">- Rs. {{ number_format($totalDiscount, 0) }}</span>
+                                <span class="text-danger fw-semibold">- PKR {{ number_format($totalDiscount, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between pt-2 fw-bold text-dark">
                                 <span>Hospital Gross Share</span>
-                                <span class="text-success fs-6">Rs. {{ number_format($totalSales, 0) }}</span>
+                                <span class="text-success fs-6">PKR {{ number_format($totalSales, 0) }}</span>
                             </li>
                         </ul>
                     </div>
@@ -174,25 +146,25 @@
                                 <span class="text-uppercase font-12 fw-bold text-primary">Hospital Net Revenue</span>
                                 <span class="badge bg-primary bg-opacity-10 text-primary"><i class="bi bi-graph-up-arrow"></i> Net Profit</span>
                             </div>
-                            <h3 class="fw-bold text-primary mb-3">Rs. {{ number_format($netRevenue, 0) }}</h3>
+                            <h3 class="fw-bold text-primary mb-3">PKR {{ number_format($netRevenue, 0) }}</h3>
                             <ul class="list-unstyled mb-2 font-13">
                                 <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                     <span class="text-secondary">Gross Service Collections</span>
-                                    <span class="fw-bold text-dark">Rs. {{ number_format($totalSales, 0) }}</span>
+                                    <span class="fw-bold text-dark">PKR {{ number_format($totalSales, 0) }}</span>
                                 </li>
                                 <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                     <span class="text-secondary d-flex align-items-center gap-1">
                                         <i class="bi bi-arrow-down-right text-danger font-12"></i> Daily Operational Expenses
                                     </span>
-                                    <span class="text-danger fw-semibold">- Rs. {{ number_format($dailyExpenses, 0) }}</span>
+                                    <span class="text-danger fw-semibold">- PKR {{ number_format($dailyExpenses, 0) }}</span>
                                 </li>
                                 <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                     <span class="text-secondary">Monthly Staff Payroll Liability</span>
-                                    <span class="text-muted">Rs. {{ number_format($staffPayroll, 0) }}</span>
+                                    <span class="text-muted">PKR {{ number_format($staffPayroll, 0) }}</span>
                                 </li>
                                 <li class="d-flex justify-content-between pt-2 fw-bold">
                                     <span class="text-dark">Operating Balance</span>
-                                    <span class="{{ $netRevenue > 0 ? 'text-primary fs-6' : 'text-danger fs-6' }}">Rs. {{ number_format($netRevenue, 0) }}</span>
+                                    <span class="{{ $netRevenue > 0 ? 'text-primary fs-6' : 'text-danger fs-6' }}">PKR {{ number_format($netRevenue, 0) }}</span>
                                 </li>
                             </ul>
                         </div>
@@ -202,7 +174,7 @@
                             <div class="d-flex flex-wrap gap-1">
                                 @foreach($expenseCategoryBreakdown as $expCat => $expData)
                                     <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 font-11">
-                                        {{ $expCat }}: Rs. {{ number_format($expData['total'], 0) }}
+                                        {{ $expCat }}: PKR {{ number_format($expData['total'], 0) }}
                                     </span>
                                 @endforeach
                             </div>
@@ -218,19 +190,19 @@
                             <span class="text-uppercase font-12 fw-bold text-warning-emphasis">Patient Accounts &amp; Dues</span>
                             <span class="badge bg-warning bg-opacity-25 text-dark"><i class="bi bi-person-lines-fill"></i> Balances</span>
                         </div>
-                        <h3 class="fw-bold text-danger mb-3">Rs. {{ number_format($totalDueAmount, 0) }}</h3>
+                        <h3 class="fw-bold text-danger mb-3">PKR {{ number_format($totalDueAmount, 0) }}</h3>
                         <ul class="list-unstyled mb-0 font-13">
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary">Total Outstanding Patient Dues</span>
-                                <span class="text-danger fw-bold">Rs. {{ number_format($totalDueAmount, 0) }}</span>
+                                <span class="text-danger fw-bold">PKR {{ number_format($totalDueAmount, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary">Patient Wallet / Advances</span>
-                                <span class="text-success fw-bold">Rs. {{ number_format($totalWalletAmount, 0) }}</span>
+                                <span class="text-success fw-bold">PKR {{ number_format($totalWalletAmount, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between py-1 border-bottom border-light-subtle">
                                 <span class="text-secondary">Avg Amount per Transaction</span>
-                                <span class="fw-semibold text-dark">Rs. {{ number_format($avgFeePerVisit, 0) }}</span>
+                                <span class="fw-semibold text-dark">PKR {{ number_format($avgFeePerVisit, 0) }}</span>
                             </li>
                             <li class="d-flex justify-content-between pt-2 fw-bold text-dark">
                                 <span>Collection Efficiency</span>
@@ -278,19 +250,19 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-bold d-flex align-items-center gap-2" id="invoices-tab" data-bs-toggle="tab" data-bs-target="#invoices-pane" type="button" role="tab" aria-controls="invoices-pane" aria-selected="true">
                             <i class="bi bi-journal-text text-primary"></i> Hospital Invoices &amp; Category Payments
-                            <span class="badge bg-primary rounded-pill">{{ $payments->total() }}</span>
+                            <span class="badge bg-primary text-white rounded-pill">{{ $payments->total() }}</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold d-flex align-items-center gap-2" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments-pane" type="button" role="tab" aria-controls="appointments-pane" aria-selected="false">
                             <i class="bi bi-calendar-check text-success"></i> Appointments Consultation Stream
-                            <span class="badge bg-secondary rounded-pill">{{ $appointments->total() }}</span>
+                            <span class="badge bg-secondary text-white rounded-pill">{{ $appointments->total() }}</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold d-flex align-items-center gap-2" id="expenses-tab" data-bs-toggle="tab" data-bs-target="#expenses-pane" type="button" role="tab" aria-controls="expenses-pane" aria-selected="false">
                             <i class="bi bi-cash-stack text-danger"></i> Daily Operational Expenses
-                            <span class="badge bg-danger rounded-pill">{{ $expenses->total() }}</span>
+                            <span class="badge bg-danger text-white rounded-pill">{{ $expenses->total() }}</span>
                         </button>
                     </li>
                 </ul>
@@ -330,7 +302,7 @@
                                     $catColor = match($pay->category) {
                                         'Consultation' => 'bg-success bg-opacity-10 text-success border border-success border-opacity-25',
                                         'Pharmacy / Medicine' => 'bg-info bg-opacity-10 text-info border border-info border-opacity-25',
-                                        'General Procedures' => 'bg-purple bg-opacity-10 text-primary border border-primary border-opacity-25',
+                                        'General Procedures' => 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25',
                                         'Diagnostics / Lab' => 'bg-warning bg-opacity-10 text-dark border border-warning border-opacity-50',
                                         'Emergency' => 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25',
                                         default => 'bg-secondary bg-opacity-10 text-secondary border',
@@ -344,11 +316,11 @@
                                         default => 'bi-tag',
                                     };
                                     $statusColor = match($pay->status) {
-                                        'Paid' => 'bg-success',
+                                        'Paid' => 'bg-success text-white',
                                         'Partial' => 'bg-info text-dark',
                                         'Pending' => 'bg-warning text-dark',
-                                        'Refunded' => 'bg-danger',
-                                        default => 'bg-secondary',
+                                        'Refunded' => 'bg-danger text-white',
+                                        default => 'bg-secondary text-white',
                                     };
                                 @endphp
                                 <tr>
@@ -385,17 +357,17 @@
                                         @endif
                                     </td>
                                     <td class="text-end fw-semibold text-dark">
-                                        Rs. {{ number_format((float) $pay->amount, 0) }}
+                                        PKR {{ number_format((float) $pay->amount, 0) }}
                                     </td>
                                     <td class="text-end text-danger fw-semibold">
                                         @if((float)$pay->discount > 0)
-                                            - Rs. {{ number_format((float) $pay->discount, 0) }}
+                                            - PKR {{ number_format((float) $pay->discount, 0) }}
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
                                     </td>
                                     <td class="text-end fw-bold text-success fs-6">
-                                        Rs. {{ number_format((float) $pay->net_amount, 0) }}
+                                        PKR {{ number_format((float) $pay->net_amount, 0) }}
                                     </td>
                                     <td>
                                         <span class="badge {{ $statusColor }} font-11 px-2 py-1 rounded-pill">
@@ -411,9 +383,9 @@
                                                 data-phone="{{ $pay->patient_phone }}"
                                                 data-category="{{ $pay->category }}"
                                                 data-doctor="{{ $pay->doctor ? $pay->doctor->name : 'Clinical Staff' }}"
-                                                data-amount="Rs. {{ number_format((float)$pay->amount, 2) }}"
-                                                data-discount="Rs. {{ number_format((float)$pay->discount, 2) }}"
-                                                data-net="Rs. {{ number_format((float)$pay->net_amount, 2) }}"
+                                                data-amount="PKR {{ number_format((float)$pay->amount, 2) }}"
+                                                data-discount="PKR {{ number_format((float)$pay->discount, 2) }}"
+                                                data-net="PKR {{ number_format((float)$pay->net_amount, 2) }}"
                                                 data-method="{{ $pay->payment_method }}"
                                                 data-notes="{{ $pay->notes }}"
                                                 title="View Receipt">
@@ -506,15 +478,15 @@
                                         </small>
                                     </td>
                                     <td class="text-end fw-bold text-success">
-                                        Rs. {{ number_format($apt->doctor ? (float)$apt->doctor->fee : 0, 0) }}
+                                        PKR {{ number_format($apt->doctor ? (float)$apt->doctor->fee : 0, 0) }}
                                     </td>
                                     <td>
                                         @php
                                             $st = strtolower($apt->status ?? 'pending');
                                             $badgeClass = match($st) {
-                                                'completed' => 'bg-success',
-                                                'confirmed' => 'bg-primary',
-                                                'cancelled' => 'bg-danger',
+                                                'completed' => 'bg-success text-white',
+                                                'confirmed' => 'bg-primary text-white',
+                                                'cancelled' => 'bg-danger text-white',
                                                 default => 'bg-warning text-dark',
                                             };
                                         @endphp
@@ -527,7 +499,7 @@
                                             <a href="{{ route('appointment.show', $apt->id) }}" class="btn btn-outline-secondary btn-sm px-2 py-1 font-11" title="View Details">
                                                 <i class="bi bi-eye"></i> Details
                                             </a>
-                                            <a href="{{ route('pdf.appointment', $apt->id) }}" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 font-11" title="Print Receipt">
+                                            <a href="{{ route('pdf.appointment', $apt->id) }}" target="_blank" class="btn btn-outline-danger btn-sm px-2 py-1 font-11" title="Print Token">
                                                 <i class="bi bi-receipt"></i> Slip
                                             </a>
                                         </div>
@@ -561,7 +533,7 @@
                         <span class="badge bg-danger text-white p-2 rounded-circle"><i class="bi bi-cash-stack"></i></span>
                         <div>
                             <h6 class="mb-0 fw-bold text-dark">Daily Hospital Expenditures &amp; Operational Costs</h6>
-                            <small class="text-muted">Showing {{ $expenses->total() }} records | Total: <strong class="text-danger">Rs. {{ number_format($dailyExpenses, 2) }}</strong></small>
+                            <small class="text-muted">Showing {{ $expenses->total() }} records | Total: <strong class="text-danger">PKR {{ number_format($dailyExpenses, 2) }}</strong></small>
                         </div>
                     </div>
                     <div class="d-flex gap-2">
@@ -569,7 +541,7 @@
                             <i class="bi bi-plus-circle me-1"></i> Add / Record Daily Expense
                         </a>
                         <a href="{{ route('reports.expenses.pdf') }}" target="_blank" class="btn btn-outline-secondary btn-sm shadow-sm">
-                            <i class="bi bi-file-earmark-pdf me-1"></i> Expenses PDF
+                            <i class="bi bi-printer me-1"></i> Print Expenses
                         </a>
                     </div>
                 </div>
@@ -582,7 +554,7 @@
                                 <th>Date</th>
                                 <th>Expense Description / Title</th>
                                 <th>Category</th>
-                                <th class="text-end">Amount (Rs.)</th>
+                                <th class="text-end">Amount (PKR)</th>
                                 <th>Recorded</th>
                                 <th class="text-end pe-3">Actions</th>
                             </tr>
@@ -610,7 +582,7 @@
                                         </span>
                                     </td>
                                     <td class="text-end fw-bold text-danger font-monospace fs-6">
-                                        Rs. {{ number_format((float) $exp->amount, 2) }}
+                                        PKR {{ number_format((float) $exp->amount, 2) }}
                                     </td>
                                     <td class="font-12 text-muted">
                                         {{ $exp->created_at ? $exp->created_at->diffForHumans() : '-' }}
@@ -684,10 +656,10 @@
                         <div class="col-12 col-md-6">
                             <label class="form-label font-13 fw-semibold">Link Registered Patient <small class="text-muted fw-normal">(Optional)</small></label>
                             <select name="patient_id" id="modal_patient_select" class="form-select">
-                                <option value="">-- Direct / Walk-in Patient --</option>
+                                <option value="" data-due="0">-- Direct / Walk-in Patient --</option>
                                 @foreach($patients as $p)
-                                    <option value="{{ $p->id }}" data-name="{{ $p->name }}" data-phone="{{ $p->phone }}" {{ old('patient_id') == $p->id ? 'selected' : '' }}>
-                                        {{ $p->name }} ({{ $p->phone ?: 'No phone' }}) - Due: Rs. {{ number_format($p->due_amount, 0) }}
+                                    <option value="{{ $p->id }}" data-name="{{ $p->name }}" data-phone="{{ $p->phone }}" data-due="{{ (float) ($p->due_amount ?? 0) }}" {{ old('patient_id') == $p->id ? 'selected' : '' }}>
+                                        {{ $p->name }} ({{ $p->phone ?: 'No phone' }}) - Due: PKR {{ number_format($p->due_amount, 0) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -712,7 +684,7 @@
                                 <option value="">-- None / General Hospital OPD --</option>
                                 @foreach($doctors as $doc)
                                     <option value="{{ $doc->id }}" data-fee="{{ $doc->fee }}" {{ old('doctor_id') == $doc->id ? 'selected' : '' }}>
-                                        {{ $doc->name }} ({{ $doc->speciality }}) - Fee: Rs. {{ number_format($doc->fee, 0) }}
+                                        {{ $doc->name }} ({{ $doc->speciality }}) - Fee: PKR {{ number_format($doc->fee, 0) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -730,17 +702,17 @@
 
                         <!-- Financials: Gross Amount, Discount, Net Payable -->
                         <div class="col-12 col-md-4">
-                            <label class="form-label font-13 fw-semibold">Gross Amount (Rs.) <span class="text-danger">*</span></label>
+                            <label class="form-label font-13 fw-semibold">Gross Amount (PKR) <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text font-12 fw-bold">Rs.</span>
+                                <span class="input-group-text font-12 fw-bold">PKR</span>
                                 <input type="number" step="0.01" min="0.01" name="amount" id="modal_amount" class="form-control fw-bold" placeholder="0.00" value="{{ old('amount') }}" required>
                             </div>
                         </div>
 
                         <div class="col-12 col-md-4">
-                            <label class="form-label font-13 fw-semibold">Discount (Rs.) <small class="text-muted fw-normal">(Optional)</small></label>
+                            <label class="form-label font-13 fw-semibold">Discount (PKR) <small class="text-muted fw-normal">(Optional)</small></label>
                             <div class="input-group">
-                                <span class="input-group-text font-12 fw-bold">Rs.</span>
+                                <span class="input-group-text font-12 fw-bold">PKR</span>
                                 <input type="number" step="0.01" min="0" name="discount" id="modal_discount" class="form-control" placeholder="0.00" value="{{ old('discount', 0) }}">
                             </div>
                         </div>
@@ -748,24 +720,65 @@
                         <div class="col-12 col-md-4">
                             <label class="form-label font-13 fw-semibold text-success">Net Payable Amount</label>
                             <div class="input-group">
-                                <span class="input-group-text font-12 fw-bold bg-success text-white">Rs.</span>
+                                <span class="input-group-text font-12 fw-bold bg-success text-white">PKR</span>
                                 <input type="text" id="modal_net_preview" class="form-control fw-bold bg-light text-success fs-6" readonly value="0.00">
                             </div>
                         </div>
 
-                        <!-- Date & Status -->
-                        <div class="col-12 col-md-6">
-                            <label class="form-label font-13 fw-semibold">Payment Date <span class="text-danger">*</span></label>
-                            <input type="date" name="payment_date" class="form-control" value="{{ old('payment_date', date('Y-m-d')) }}" required>
-                        </div>
-
-                        <div class="col-12 col-md-6">
+                        <!-- Payment Status, Paid Amount, and Date -->
+                        <div class="col-12 col-md-4">
                             <label class="form-label font-13 fw-semibold">Payment Status <span class="text-danger">*</span></label>
-                            <select name="status" class="form-select" required>
+                            <select name="status" id="modal_status" class="form-select" required>
                                 <option value="Paid" {{ old('status', 'Paid') === 'Paid' ? 'selected' : '' }}>Paid in Full</option>
                                 <option value="Partial" {{ old('status') === 'Partial' ? 'selected' : '' }}>Partially Paid</option>
                                 <option value="Pending" {{ old('status') === 'Pending' ? 'selected' : '' }}>Pending / Unpaid</option>
                             </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label font-13 fw-semibold">Paid / Received (PKR) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text font-12 fw-bold bg-primary text-white">PKR</span>
+                                <input type="number" step="0.01" min="0" name="paid_amount" id="modal_paid_amount" class="form-control fw-bold" placeholder="0.00" value="{{ old('paid_amount') }}">
+                            </div>
+                            <small class="text-muted font-11" id="modal_paid_hint">Auto-synced with Net Amount for full payment</small>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label font-13 fw-semibold">Payment Date <span class="text-danger">*</span></label>
+                            <input type="date" name="payment_date" class="form-control" value="{{ old('payment_date', date('Y-m-d')) }}" required>
+                        </div>
+
+                        <!-- Real-time Dues with Discount Breakdown Card -->
+                        <div class="col-12">
+                            <div class="p-3 rounded-3 border bg-light shadow-xs">
+                                <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom flex-wrap gap-2">
+                                    <span class="font-12 fw-bold text-uppercase text-secondary d-flex align-items-center gap-1">
+                                        <i class="bi bi-calculator-fill text-primary"></i> Real-time Dues &amp; Discount Calculation
+                                    </span>
+                                    <span id="modal_dues_badge" class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 font-12">
+                                        <i class="bi bi-check-circle me-1"></i> Balance Cleared (PKR 0.00)
+                                    </span>
+                                </div>
+                                <div class="row g-2 text-center text-sm-start font-12">
+                                    <div class="col-6 col-sm-3">
+                                        <span class="text-muted d-block font-11">Previous Patient Dues</span>
+                                        <strong id="modal_calc_prev_dues" class="text-dark font-monospace fs-6">PKR 0.00</strong>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <span class="text-muted d-block font-11">Net Current Bill</span>
+                                        <strong id="modal_calc_net_bill" class="text-success font-monospace fs-6">PKR 0.00</strong>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <span class="text-muted d-block font-11">Total Bill + Prev Dues</span>
+                                        <strong id="modal_calc_total_payable" class="text-primary font-monospace fs-6">PKR 0.00</strong>
+                                    </div>
+                                    <div class="col-6 col-sm-3">
+                                        <span class="text-muted d-block font-11">Remaining Balance / Dues</span>
+                                        <strong id="modal_calc_remaining_dues" class="text-danger font-monospace fs-6">PKR 0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Clinical Notes & Descriptions -->
@@ -813,16 +826,16 @@
                 <div class="bg-light p-3 rounded-3 border mb-3">
                     <div class="d-flex justify-content-between font-13 py-1">
                         <span class="text-muted">Gross Total:</span>
-                        <strong id="receipt_gross">Rs. 0.00</strong>
+                        <strong id="receipt_gross">PKR 0.00</strong>
                     </div>
                     <div class="d-flex justify-content-between font-13 py-1 text-danger">
                         <span>Discount:</span>
-                        <span id="receipt_discount">Rs. 0.00</span>
+                        <span id="receipt_discount">PKR 0.00</span>
                     </div>
                     <hr class="my-1">
                     <div class="d-flex justify-content-between font-14 fw-bold text-success pt-1">
                         <span>Net Paid:</span>
-                        <span id="receipt_net" class="fs-6">Rs. 0.00</span>
+                        <span id="receipt_net" class="fs-6">PKR 0.00</span>
                     </div>
                 </div>
                 <div class="font-12 text-muted" id="receipt_notes_wrapper">
@@ -832,7 +845,7 @@
             <div class="modal-footer bg-light py-2">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary btn-sm px-3" onclick="window.printReceiptModal()">
-                    <i class="bi bi-printer me-1"></i> Print Slip
+                    <i class="bi bi-printer me-1"></i> Print Receipt
                 </button>
             </div>
         </div>
@@ -842,50 +855,187 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Real-time calculation of Net Amount in Add Payment Modal
+    // ========== REAL-TIME DUES, DISCOUNT & PAYMENT CALCULATION ==========
     const amountInput = document.getElementById('modal_amount');
     const discountInput = document.getElementById('modal_discount');
     const netPreview = document.getElementById('modal_net_preview');
-
-    function calculateNet() {
-        const amt = parseFloat(amountInput.value) || 0;
-        const disc = parseFloat(discountInput.value) || 0;
-        const net = Math.max(0, amt - disc);
-        netPreview.value = net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    if (amountInput && discountInput) {
-        amountInput.addEventListener('input', calculateNet);
-        discountInput.addEventListener('input', calculateNet);
-    }
-
-    // Auto-fill patient name and phone on select
+    const statusSelect = document.getElementById('modal_status');
+    const paidAmountInput = document.getElementById('modal_paid_amount');
+    const paidHint = document.getElementById('modal_paid_hint');
     const patientSelect = document.getElementById('modal_patient_select');
     const patientName = document.getElementById('modal_patient_name');
     const patientPhone = document.getElementById('modal_patient_phone');
+    const doctorSelect = document.getElementById('modal_doctor_id');
+    const categorySelect = document.getElementById('modal_category');
 
+    // Display elements for live calculation card
+    const prevDuesEl = document.getElementById('modal_calc_prev_dues');
+    const netBillEl = document.getElementById('modal_calc_net_bill');
+    const totalPayableEl = document.getElementById('modal_calc_total_payable');
+    const remainingDuesEl = document.getElementById('modal_calc_remaining_dues');
+    const duesBadgeEl = document.getElementById('modal_dues_badge');
+
+    function calculatePaymentAndDues(triggerSource) {
+        const grossAmt = Math.max(0, parseFloat(amountInput.value) || 0);
+        let disc = Math.max(0, parseFloat(discountInput.value) || 0);
+
+        // Discount cannot exceed gross amount
+        if (grossAmt > 0 && disc > grossAmt) {
+            disc = grossAmt;
+            discountInput.value = disc;
+        }
+
+        const netAmt = Math.max(0, grossAmt - disc);
+        if (netPreview) {
+            netPreview.value = netAmt > 0 ? netAmt.toFixed(2) : '0.00';
+        }
+
+        // Selected patient's prior due balance
+        let prevDue = 0;
+        if (patientSelect && patientSelect.selectedIndex >= 0) {
+            const opt = patientSelect.options[patientSelect.selectedIndex];
+            prevDue = parseFloat(opt.getAttribute('data-due')) || 0;
+        }
+
+        const status = statusSelect ? statusSelect.value : 'Paid';
+
+        // Auto-synchronize paid amount based on trigger source and status
+        if (paidAmountInput) {
+            if (triggerSource === 'status') {
+                if (status === 'Paid') {
+                    paidAmountInput.value = netAmt > 0 ? netAmt.toFixed(2) : '0.00';
+                    if (paidHint) paidHint.innerText = 'Paid in full: auto-synced with Net Amount';
+                } else if (status === 'Pending') {
+                    paidAmountInput.value = '0.00';
+                    if (paidHint) paidHint.innerText = 'Unpaid: full bill added to patient dues balance';
+                } else if (status === 'Partial') {
+                    let curPaid = parseFloat(paidAmountInput.value) || 0;
+                    if (curPaid <= 0 || curPaid >= netAmt) {
+                        curPaid = Math.round((netAmt / 2) * 100) / 100;
+                        paidAmountInput.value = curPaid > 0 ? curPaid.toFixed(2) : '0.00';
+                    }
+                    if (paidHint) paidHint.innerText = 'Partially paid: remaining bill added to patient dues';
+                }
+            } else if (triggerSource === 'amount' || triggerSource === 'discount' || triggerSource === 'init') {
+                if (status === 'Paid') {
+                    paidAmountInput.value = netAmt > 0 ? netAmt.toFixed(2) : '0.00';
+                    if (paidHint) paidHint.innerText = 'Paid in full: auto-synced with Net Amount';
+                } else if (status === 'Pending') {
+                    paidAmountInput.value = '0.00';
+                    if (paidHint) paidHint.innerText = 'Unpaid: full bill added to patient dues balance';
+                } else if (status === 'Partial') {
+                    let curPaid = parseFloat(paidAmountInput.value) || 0;
+                    if (curPaid > netAmt) {
+                        paidAmountInput.value = netAmt.toFixed(2);
+                    }
+                }
+            } else if (triggerSource === 'paid') {
+                const userPaid = parseFloat(paidAmountInput.value) || 0;
+                if (userPaid >= netAmt && netAmt > 0) {
+                    if (statusSelect) statusSelect.value = 'Paid';
+                    if (paidHint) paidHint.innerText = 'Full payment detected';
+                } else if (userPaid <= 0) {
+                    if (statusSelect) statusSelect.value = 'Pending';
+                    if (paidHint) paidHint.innerText = 'Pending status detected';
+                } else {
+                    if (statusSelect) statusSelect.value = 'Partial';
+                    if (paidHint) paidHint.innerText = 'Partial payment detected';
+                }
+            }
+        }
+
+        const actualPaid = paidAmountInput ? Math.min(netAmt, Math.max(0, parseFloat(paidAmountInput.value) || 0)) : netAmt;
+        const currentBillRemainingDue = Math.max(0, netAmt - actualPaid);
+        const totalPayableBeforePayment = prevDue + netAmt;
+        const finalOutstandingBalance = prevDue + currentBillRemainingDue;
+
+        // Update live calculation breakdown card
+        if (prevDuesEl) {
+            prevDuesEl.innerText = 'PKR ' + prevDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        if (netBillEl) {
+            netBillEl.innerText = 'PKR ' + netAmt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        if (totalPayableEl) {
+            totalPayableEl.innerText = 'PKR ' + totalPayableBeforePayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        if (remainingDuesEl) {
+            remainingDuesEl.innerText = 'PKR ' + finalOutstandingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Update Badge
+        if (duesBadgeEl) {
+            if (finalOutstandingBalance <= 0) {
+                duesBadgeEl.className = 'badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 font-12';
+                duesBadgeEl.innerHTML = '<i class="bi bi-check-circle me-1"></i> Balance Cleared (PKR 0.00)';
+            } else {
+                duesBadgeEl.className = 'badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1 font-12';
+                duesBadgeEl.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Total Due: PKR ' + finalOutstandingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+    }
+
+    // Attach real-time calculation event listeners
+    ['input', 'keyup', 'change'].forEach(function (evt) {
+        if (amountInput) {
+            amountInput.addEventListener(evt, function () { calculatePaymentAndDues('amount'); });
+        }
+        if (discountInput) {
+            discountInput.addEventListener(evt, function () { calculatePaymentAndDues('discount'); });
+        }
+        if (paidAmountInput) {
+            paidAmountInput.addEventListener(evt, function () { calculatePaymentAndDues('paid'); });
+        }
+    });
+
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function () { calculatePaymentAndDues('status'); });
+    }
+
+    // Auto-fill patient name, phone, and prior due on selection
     if (patientSelect) {
         patientSelect.addEventListener('change', function () {
             const selected = this.options[this.selectedIndex];
-            if (selected.value) {
-                patientName.value = selected.getAttribute('data-name') || '';
-                patientPhone.value = selected.getAttribute('data-phone') || '';
+            if (selected && selected.value) {
+                if (patientName) patientName.value = selected.getAttribute('data-name') || '';
+                if (patientPhone) patientPhone.value = selected.getAttribute('data-phone') || '';
             }
+            calculatePaymentAndDues('patient');
         });
     }
 
     // Auto-fill doctor fee if Consultation is selected and Doctor chosen
-    const doctorSelect = document.getElementById('modal_doctor_id');
-    const categorySelect = document.getElementById('modal_category');
-
     if (doctorSelect && amountInput) {
         doctorSelect.addEventListener('change', function () {
             const selected = this.options[this.selectedIndex];
             const fee = parseFloat(selected.getAttribute('data-fee')) || 0;
-            if (fee > 0 && (!amountInput.value || categorySelect.value === 'Consultation')) {
+            if (fee > 0 && (!amountInput.value || (categorySelect && categorySelect.value === 'Consultation'))) {
                 amountInput.value = fee;
-                calculateNet();
+                calculatePaymentAndDues('amount');
             }
+        });
+    }
+
+    if (categorySelect && doctorSelect && amountInput) {
+        categorySelect.addEventListener('change', function () {
+            if (this.value === 'Consultation' && doctorSelect.selectedIndex > 0) {
+                const selected = doctorSelect.options[doctorSelect.selectedIndex];
+                const fee = parseFloat(selected.getAttribute('data-fee')) || 0;
+                if (fee > 0) {
+                    amountInput.value = fee;
+                    calculatePaymentAndDues('amount');
+                }
+            }
+        });
+    }
+
+    // Recalculate on Add Payment modal show and on initial load
+    calculatePaymentAndDues('init');
+
+    const addPaymentModalEl = document.getElementById('addPaymentModal');
+    if (addPaymentModalEl) {
+        addPaymentModalEl.addEventListener('shown.bs.modal', function () {
+            calculatePaymentAndDues('init');
         });
     }
 
@@ -896,7 +1046,7 @@ document.addEventListener('DOMContentLoaded', function () {
         receiptModal = bootstrap.Modal.getOrCreateInstance(receiptModalEl);
     }
 
-    document.querySelectorAll('.btn-view-receipt').forEach(btn => {
+    document.querySelectorAll('.btn-view-receipt').forEach(function (btn) {
         btn.addEventListener('click', function () {
             document.getElementById('receipt_invoice').innerText = this.getAttribute('data-invoice');
             document.getElementById('receipt_date').innerText = this.getAttribute('data-date');
@@ -918,26 +1068,54 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Print Receipt Helper
-    window.printReceiptModal = function() {
-        const printContent = document.getElementById('printableReceiptArea').innerHTML;
-        const printWindow = window.open('', '_blank', 'width=600,height=700');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Hospital Receipt</title>
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                    <style>
-                        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; }
-                        @media print { .btn { display: none; } }
-                    </style>
-                </head>
-                <body onload="window.print(); window.close();">
-                    ${printContent}
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
+    // Clean, Isolated Receipt Printing Helper using safe DOM cloning (Zero raw HTML tags in script)
+    window.printReceiptModal = function () {
+        const receiptEl = document.getElementById('printableReceiptArea');
+        if (!receiptEl) return;
+
+        let printFrame = document.getElementById('hmsReceiptPrintFrame');
+        if (!printFrame) {
+            printFrame = document.createElement('iframe');
+            printFrame.id = 'hmsReceiptPrintFrame';
+            printFrame.style.position = 'fixed';
+            printFrame.style.right = '0';
+            printFrame.style.bottom = '0';
+            printFrame.style.width = '0';
+            printFrame.style.height = '0';
+            printFrame.style.border = '0';
+            printFrame.style.opacity = '0';
+            printFrame.style.pointerEvents = 'none';
+            document.body.appendChild(printFrame);
+        }
+
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.head.innerHTML = '';
+        frameDoc.body.innerHTML = '';
+
+        const titleEl = frameDoc.createElement('title');
+        titleEl.textContent = 'Hospital Payment Receipt';
+        frameDoc.head.appendChild(titleEl);
+
+        const linkEl = frameDoc.createElement('link');
+        linkEl.rel = 'stylesheet';
+        linkEl.href = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css';
+        frameDoc.head.appendChild(linkEl);
+
+        const styleEl = frameDoc.createElement('style');
+        styleEl.textContent = '@page { size: auto; margin: 10mm; } body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; background: #fff; color: #000; } .btn { display: none !important; }';
+        frameDoc.head.appendChild(styleEl);
+
+        const clone = receiptEl.cloneNode(true);
+        frameDoc.body.appendChild(clone);
+
+        setTimeout(function () {
+            try {
+                printFrame.contentWindow.focus();
+                printFrame.contentWindow.print();
+            } catch (err) {
+                console.error('Print receipt error:', err);
+            }
+        }, 250);
     };
 });
 </script>

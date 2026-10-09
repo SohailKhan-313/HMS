@@ -30,6 +30,7 @@ class StoreHospitalPaymentRequest extends FormRequest
             'appointment_id' => ['nullable', 'integer', 'exists:appointments,id'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'payment_method' => ['required', 'string', 'in:Cash,Card,Bank Transfer,Wallet'],
             'payment_date' => ['required', 'date'],
             'status' => ['required', 'string', 'in:Paid,Partial,Pending,Refunded'],

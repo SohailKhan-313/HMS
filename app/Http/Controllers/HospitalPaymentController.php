@@ -280,7 +280,14 @@ class HospitalPaymentController extends Controller
             }
         }
 
-        $paidAmount = $validated['status'] === 'Paid' ? $netAmount : (float) ($validated['paid_amount'] ?? $netAmount);
+        if ($validated['status'] === 'Paid') {
+            $paidAmount = $netAmount;
+        } elseif ($validated['status'] === 'Pending') {
+            $paidAmount = 0.0;
+        } else {
+            $paidAmount = isset($validated['paid_amount']) ? (float) $validated['paid_amount'] : $netAmount;
+        }
+        $paidAmount = min($paidAmount, $netAmount);
 
         $payment = HospitalPayment::create([
             'invoice_no' => HospitalPayment::generateInvoiceNo(),
@@ -317,7 +324,7 @@ class HospitalPaymentController extends Controller
         }
 
         return redirect()->route('hospital-payments')
-            ->with('success', "Payment #{$payment->invoice_no} of Rs. ".number_format($netAmount, 0)." for {$payment->category} recorded successfully!");
+            ->with('success', "Payment #{$payment->invoice_no} of PKR ".number_format($netAmount, 0)." for {$payment->category} recorded successfully!");
     }
 
     /**
@@ -330,6 +337,7 @@ class HospitalPaymentController extends Controller
         $payment->delete();
 
         return redirect()->route('hospital-payments')
-            ->with('success', "Payment #{$invoice} deleted successfully.");
+            ->with('success', "Payment #{$invoice} deleted successfully.")
+            ->with('delete', "Payment #{$invoice} deleted successfully.");
     }
 }

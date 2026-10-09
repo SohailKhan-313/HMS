@@ -113,11 +113,9 @@
         }
 
         .stat-number {
-            background: white;
             border-radius: 40px;
             padding: 0.2rem 0.7rem;
             font-weight: 600;
-            color: #0b2b4f;
         }
 
         /* small action buttons inside table */
@@ -367,7 +365,7 @@
                             <i class="bi bi-calendar-plus-fill me-1"></i> Create Appointment
                         </button>
                         <a href="{{ route('reports.appointments.pdf', ['search' => request('search')]) }}" target="_blank" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-1 shadow-sm">
-                            <i class="bi bi-file-earmark-pdf"></i> Print Table (PDF)
+                            <i class="bi bi-printer me-1"></i> Print Appointments
                         </a>
                     </div>
                     <div class="d-flex gap-2 ms-auto">
@@ -422,7 +420,7 @@
                         <span class="stat-item bg-light border rounded-3 px-3 py-2 d-flex align-items-center gap-1">
                             <i class="bi bi-calendar-day text-primary"></i>
                             Today's Total
-                            <span class="stat-number ms-2 badge bg-primary">{{ $totalToday }}</span>
+                            <span class="stat-number ms-2 badge bg-primary text-white">{{ $totalToday }}</span>
                         </span>
 
                         <span class="stat-item bg-light border rounded-3 px-3 py-2 d-flex align-items-center gap-1">
@@ -434,7 +432,7 @@
                         <span class="stat-item bg-light border rounded-3 px-3 py-2 d-flex align-items-center gap-1">
                             <i class="bi bi-check-circle text-success"></i>
                             Completed
-                            <span class="stat-number ms-2 badge bg-success">{{ $completed }}</span>
+                            <span class="stat-number ms-2 badge bg-success text-white">{{ $completed }}</span>
                         </span>
 
                         <span class="stat-item bg-light border rounded-3 px-3 py-2 d-flex align-items-center gap-1">
@@ -446,7 +444,7 @@
                         <span class="stat-item bg-light border rounded-3 px-3 py-2 d-flex align-items-center gap-1">
                             <i class="bi bi-x-circle text-danger"></i>
                             Cancelled
-                            <span class="stat-number ms-2 badge bg-danger">{{ $cancelled }}</span>
+                            <span class="stat-number ms-2 badge bg-danger text-white">{{ $cancelled }}</span>
                         </span>
 
                     </div>
@@ -644,16 +642,16 @@
                                                 </span>
 
                                             @elseif($a->status == 'Completed')
-                                                <span class="badge bg-success">
+                                                <span class="badge bg-success text-white">
                                                     <i class="bi bi-check-circle"></i> Completed
                                                 </span>
 
                                             @elseif($a->status == 'Admitted')
-                                                <span class="badge bg-primary">
-                                                    <i class="bi bi-x-circle"></i> Admitted
+                                                <span class="badge bg-primary text-white">
+                                                    <i class="bi bi-hospital"></i> Admitted
                                                 </span>
                                             @else
-                                                <span class="badge bg-danger">
+                                                <span class="badge bg-danger text-white">
                                                     <i class="bi bi-x-circle"></i> cancelled
                                                 </span>
                                             @endif
@@ -666,10 +664,10 @@
 
                                         <td>
                                             <div class="d-flex gap-2 align-items-center">
-                                                <!-- Print Receipt button (outline, icon only) -->
+                                                <!-- Print Token Slip button -->
                                                 <a href="{{ route('pdf.appointment', $a->id) }}" id="printLink" target="_blank"
-                                                    class="btn btn-outline-primary btn-sm">
-                                                    <i class="bi bi-receipt"></i>
+                                                    class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" title="Print Token">
+                                                    <i class="bi bi-receipt"></i> Print Token
                                                 </a>
 
                                                 <!-- Actions dropdown -->
@@ -938,7 +936,7 @@
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Close</button>
                                         <button type="button" class="btn btn-primary" id="printAppointmentBtn">
-                                            <i class="bi bi-printer"></i> Print token
+                                            <i class="bi bi-printer me-1"></i> Print Token
                                         </button>
 
                                     </div>
@@ -1043,7 +1041,7 @@
                                                 <p><strong>👨‍⚕️ Doctor:</strong> ${data.doctor ? data.doctor.name : 'N/A'}</p>
                                                 <p><strong>📞 Phone:</strong> ${data.phone || 'N/A'}</p>
                                                 <p><strong>📝 Status:</strong> 
-                                                    <span class="badge ${data.status === 'Completed' ? 'bg-success' : (data.status === 'Cancelled' ? 'bg-danger' : 'bg-warning')}">
+                                                    <span class="badge ${data.status === 'Completed' ? 'bg-success text-white' : (data.status === 'Cancelled' ? 'bg-danger text-white' : (data.status === 'Admitted' ? 'bg-primary text-white' : 'bg-warning text-dark'))}">
                                                         ${data.status || 'Pending'}
                                                     </span>
                                                 </p>
@@ -1200,60 +1198,7 @@
                     <div class="d-flex gap-3 mt-4" style="color:#7589a2; font-size:0.85rem;">
                         <i class="bi bi-info-circle"></i> 1 appointment today · last updated 20/05/2015
                     </div>
-                    <!-- Toast Container -->
-                    <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
-                        @php
-                            $toastMessage = '';
-                            $toastIcon = '';
-                            $textColor = '';
-                        @endphp
 
-                        @if(session('success') || session('update') || session('delete'))
-                            @php
-                                if (session('success')) {
-                                    $toastMessage = session('success');
-                                    $toastIcon = 'bi-check-circle-fill text-success';
-                                    $textColor = 'text-success';
-                                } elseif (session('update')) {
-                                    $toastMessage = session('update');
-                                    $toastIcon = 'bi-pencil-square text-primary';
-                                    $textColor = 'text-primary';
-                                } elseif (session('delete')) {
-                                    $toastMessage = session('delete');
-                                    $toastIcon = 'bi-trash-fill text-danger';
-                                    $textColor = 'text-danger';
-                                }
-                            @endphp
-                            <div id="actionToast" class="toast border-0 shadow-lg bg-white" role="alert">
-                                <div class="toast-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="fs-3">
-                                            <i class="bi {{ $toastIcon }}"></i>
-                                        </div>
-                                        <div class="ms-3">
-                                            <div class="{{ $textColor }}">
-                                                {{ $toastMessage }}
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                    @if(session('success') || session('update') || session('delete'))
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                const toastEl = document.getElementById('actionToast');
-                                if (toastEl) {
-                                    const toast = new bootstrap.Toast(toastEl, { delay: 2000, autohide: true });
-                                    toast.show();
-                                }
-                            });
-                        </script>
-
-                    @endif
                 </div> <!-- end card-body -->
             </div> <!-- end appointment-card -->
         </div> <!-- end container -->

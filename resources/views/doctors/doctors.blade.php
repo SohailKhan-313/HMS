@@ -287,7 +287,7 @@
                 </h2>
                 <div class="d-flex gap-2">
                     <a href="{{ route('reports.doctors.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm shadow-sm d-flex align-items-center gap-1">
-                        <i class="bi bi-file-earmark-pdf"></i> Print / Export (PDF)
+                        <i class="bi bi-printer me-1"></i> Print Doctors
                     </a>
                     @if(auth()->user()?->canManageDoctors())
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#doctorModal">
@@ -297,61 +297,6 @@
                 </div>
             </div>
 
-            <!-- Toast Notifications (exactly from Staff) -->
-            <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
-                @php
-                $toastMessage = '';
-                $toastIcon = '';
-                $textColor = '';
-                @endphp
-
-                @if(session('success') || session('update') || session('delete'))
-                @php
-                if(session('success')) {
-                $toastMessage = session('success');
-                $toastIcon = 'bi-check-circle-fill text-success';
-                $textColor = 'text-success';
-                } elseif(session('update')) {
-                $toastMessage = session('update');
-                $toastIcon = 'bi-pencil-square text-primary';
-                $textColor = 'text-primary';
-                } elseif(session('delete')) {
-                $toastMessage = session('delete');
-                $toastIcon = 'bi-trash-fill text-danger';
-                $textColor = 'text-danger';
-                }
-                @endphp
-                <div id="actionToast" class="toast border-0 shadow-lg bg-white" role="alert">
-                    <div class="toast-body">
-                        <div class="d-flex align-items-center">
-                            <div class="fs-3">
-                                <i class="bi {{ $toastIcon }}"></i>
-                            </div>
-                            <div class="ms-3">
-                                <div class="{{ $textColor }}">
-                                    {{ $toastMessage }}
-                                </div>
-                            </div>
-                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    </div>
-                </div>
-                @endif
-            </div>
-            @if(session('success') || session('update') || session('delete'))
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    const toastEl = document.getElementById('actionToast');
-                    if (toastEl) {
-                        const toast = new bootstrap.Toast(toastEl, {
-                            delay: 2000,
-                            autohide: true
-                        });
-                        toast.show();
-                    }
-                });
-            </script>
-            @endif
             <!-- ADD DOCTOR MODAL -->
             <div class="modal fade" id="doctorModal" tabindex="-1">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -723,7 +668,7 @@
                                         <i class="bi bi-trash"></i>
                                     </a>
                                     @else
-                                    <span class="badge bg-light text-muted font-11"><i class="bi bi-eye"></i> View Only</span>
+                                    <span class="badge bg-light text-dark border font-11"><i class="bi bi-eye"></i> View Only</span>
                                     @endif
                                 </td>
                             </tr>

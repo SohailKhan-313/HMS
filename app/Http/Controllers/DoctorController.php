@@ -125,7 +125,7 @@ class DoctorController extends Controller
             'duty_schedule' => json_encode($dutySchedule),
         ]);
 
-        return redirect()->route('doctors.index')->with('success', 'Doctor updated successfully!');
+        return redirect()->route('doctors.index')->with('update', 'Doctor updated successfully!');
     }
 
     /**
@@ -136,6 +136,6 @@ class DoctorController extends Controller
         $doctor = Doctor::findOrFail($id);
         $doctor->delete();
 
-        return redirect()->route('doctors.index')->with('success', 'Doctor removed successfully.');
+        return redirect()->route('doctors.index')->with('delete', 'Doctor removed successfully.');
     }
 }

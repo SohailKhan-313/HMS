@@ -61,9 +61,13 @@ class ReportController extends Controller
     /**
      * Export daily expenses audit report to PDF.
      */
-    public function expensesPdf(): Response
+    public function expensesPdf(Request $request): Response
     {
-        return $this->pdfService->exportExpensesPdf();
+        return $this->pdfService->exportExpensesPdf(
+            $request->query('from_date'),
+            $request->query('to_date'),
+            $request->query('category')
+        );
     }
 
     /**

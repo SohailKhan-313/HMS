@@ -98,8 +98,8 @@ class PdfReportService
         $totalWallet = $patients->sum('wallet_amount');
 
         $pdf->Cell(63, 7, 'Total Patients: '.$patients->count(), 1, 0, 'C', true);
-        $pdf->Cell(64, 7, 'Total Outstanding Due: Rs. '.number_format($totalDues, 2), 1, 0, 'C', true);
-        $pdf->Cell(63, 7, 'Total Wallet Credit: Rs. '.number_format($totalWallet, 2), 1, 1, 'C', true);
+        $pdf->Cell(64, 7, 'Total Outstanding Due: PKR '.number_format($totalDues, 2), 1, 0, 'C', true);
+        $pdf->Cell(63, 7, 'Total Wallet Credit: PKR '.number_format($totalWallet, 2), 1, 1, 'C', true);
         $pdf->Ln(3);
 
         // Table Header
@@ -111,8 +111,8 @@ class PdfReportService
         $pdf->Cell(14, 7, 'Age', 1, 0, 'C', true);
         $pdf->Cell(32, 7, 'Phone Number', 1, 0, 'C', true);
         $pdf->Cell(37, 7, 'CNIC / Identity', 1, 0, 'C', true);
-        $pdf->Cell(25, 7, 'Due (Rs.)', 1, 0, 'R', true);
-        $pdf->Cell(25, 7, 'Wallet (Rs.)', 1, 1, 'R', true);
+        $pdf->Cell(25, 7, 'Due (PKR)', 1, 0, 'R', true);
+        $pdf->Cell(25, 7, 'Wallet (PKR)', 1, 1, 'R', true);
 
         // Table Body
         $pdf->SetFont('Arial', '', 8);
@@ -191,8 +191,8 @@ class PdfReportService
         $pdf->Cell(0, 8, 'FINANCIAL & BILLING STATUS', 1, 1, 'L', true);
 
         $pdf->SetFont('Arial', '', 9);
-        $pdf->Cell(95, 7, 'Outstanding Due Balance: Rs. '.number_format((float) $patient->due_amount, 2), 1, 0, 'L');
-        $pdf->Cell(95, 7, 'Available Wallet Credit: Rs. '.number_format((float) $patient->wallet_amount, 2), 1, 1, 'L');
+        $pdf->Cell(95, 7, 'Outstanding Due Balance: PKR '.number_format((float) $patient->due_amount, 2), 1, 0, 'L');
+        $pdf->Cell(95, 7, 'Available Wallet Credit: PKR '.number_format((float) $patient->wallet_amount, 2), 1, 1, 'L');
 
         $pdf->Ln(6);
 
@@ -345,7 +345,7 @@ class PdfReportService
         $pdf->Cell(35, 7, 'Speciality', 1, 0, 'L', true);
         $pdf->Cell(28, 7, 'PMDC Reg.', 1, 0, 'C', true);
         $pdf->Cell(28, 7, 'Phone Number', 1, 0, 'C', true);
-        $pdf->Cell(22, 7, 'Fee (Rs.)', 1, 0, 'R', true);
+        $pdf->Cell(22, 7, 'Fee (PKR)', 1, 0, 'R', true);
         $pdf->Cell(20, 7, 'Duty Days', 1, 1, 'C', true);
 
         // Table Body
@@ -380,7 +380,7 @@ class PdfReportService
 
         $pdf = new HospitalPdfDocument('P', 'mm', 'A4');
         $pdf->reportTitle = 'Hospital Staff & Personnel Directory';
-        $pdf->subTitle = 'Total Staff Members: '.$staff->count().' | Monthly Payroll: Rs. '.number_format($staff->sum('salary'), 2);
+        $pdf->subTitle = 'Total Staff Members: '.$staff->count().' | Monthly Payroll: PKR '.number_format($staff->sum('salary'), 2);
         $pdf->AliasNbPages();
         $pdf->AddPage();
 
@@ -392,7 +392,7 @@ class PdfReportService
         $pdf->Cell(50, 7, 'Employee Name', 1, 0, 'L', true);
         $pdf->Cell(38, 7, 'Designation', 1, 0, 'L', true);
         $pdf->Cell(32, 7, 'Phone Number', 1, 0, 'C', true);
-        $pdf->Cell(30, 7, 'Salary (Rs.)', 1, 0, 'R', true);
+        $pdf->Cell(30, 7, 'Salary (PKR)', 1, 0, 'R', true);
         $pdf->Cell(28, 7, 'Joined Date', 1, 1, 'C', true);
 
         // Table Body
@@ -420,14 +420,37 @@ class PdfReportService
     /**
      * Generate Expenses Ledger PDF Report.
      */
-    public function exportExpensesPdf(): Response
+    public function exportExpensesPdf(?string $fromDate = null, ?string $toDate = null, ?string $category = null): Response
     {
-        $expenses = Expense::query()->latest('date')->get();
+        $query = Expense::query();
+        if ($fromDate) {
+            $query->whereDate('date', '>=', $fromDate);
+        }
+        if ($toDate) {
+            $query->whereDate('date', '<=', $toDate);
+        }
+        if ($category && $category !== 'all') {
+            $query->where('catagory', $category);
+        }
+        $expenses = $query->orderByDesc('date')->orderByDesc('id')->get();
         $totalExpense = $expenses->sum('amount');
 
+        $rangeText = [];
+        if ($fromDate && $toDate) {
+            $rangeText[] = 'Period: '.Carbon::parse($fromDate)->format('d M Y').' - '.Carbon::parse($toDate)->format('d M Y');
+        } elseif ($fromDate) {
+            $rangeText[] = 'From: '.Carbon::parse($fromDate)->format('d M Y');
+        } elseif ($toDate) {
+            $rangeText[] = 'Until: '.Carbon::parse($toDate)->format('d M Y');
+        }
+        if ($category && $category !== 'all') {
+            $rangeText[] = 'Category: '.$category;
+        }
+        $filterNote = ! empty($rangeText) ? ' ('.implode(' | ', $rangeText).')' : '';
+
         $pdf = new HospitalPdfDocument('P', 'mm', 'A4');
-        $pdf->reportTitle = 'Daily Operational Expenses Audit';
-        $pdf->subTitle = 'Total Entries: '.$expenses->count().' | Total Expenditure: Rs. '.number_format($totalExpense, 2);
+        $pdf->reportTitle = 'Daily Operational Expenses Audit'.$filterNote;
+        $pdf->subTitle = 'Total Entries: '.$expenses->count().' | Total Expenditure: PKR '.number_format($totalExpense, 2);
         $pdf->AliasNbPages();
         $pdf->AddPage();
 
@@ -439,7 +462,7 @@ class PdfReportService
         $pdf->Cell(30, 7, 'Expense Date', 1, 0, 'C', true);
         $pdf->Cell(70, 7, 'Description / Title', 1, 0, 'L', true);
         $pdf->Cell(45, 7, 'Category', 1, 0, 'L', true);
-        $pdf->Cell(30, 7, 'Amount (Rs.)', 1, 1, 'R', true);
+        $pdf->Cell(30, 7, 'Amount (PKR)', 1, 1, 'R', true);
 
         // Table Body
         $pdf->SetFont('Arial', '', 8);
@@ -463,7 +486,7 @@ class PdfReportService
         $pdf->SetTextColor(15, 23, 42);
         $pdf->Cell(160, 8, 'TOTAL ACCUMULATED OPERATIONAL EXPENDITURE:', 1, 0, 'R', true);
         $pdf->SetTextColor(185, 28, 28);
-        $pdf->Cell(30, 8, 'Rs. '.number_format($totalExpense, 2), 1, 1, 'R', true);
+        $pdf->Cell(30, 8, 'PKR '.number_format($totalExpense, 2), 1, 1, 'R', true);
 
         return response($pdf->Output('S'))
             ->header('Content-Type', 'application/pdf')
@@ -522,13 +545,13 @@ class PdfReportService
 
         $pdf->SetFont('Arial', 'B', 9);
         $pdf->SetTextColor(37, 99, 235);
-        $pdf->Cell(47, 7, 'Rs. '.number_format($totalSales, 2), 1, 0, 'C');
+        $pdf->Cell(47, 7, 'PKR '.number_format($totalSales, 2), 1, 0, 'C');
         $pdf->SetTextColor(185, 28, 28);
-        $pdf->Cell(47, 7, 'Rs. '.number_format($totalExpenses, 2), 1, 0, 'C');
+        $pdf->Cell(47, 7, 'PKR '.number_format($totalExpenses, 2), 1, 0, 'C');
         $pdf->SetTextColor(16, 185, 129);
-        $pdf->Cell(47, 7, 'Rs. '.number_format($netRevenue, 2), 1, 0, 'C');
+        $pdf->Cell(47, 7, 'PKR '.number_format($netRevenue, 2), 1, 0, 'C');
         $pdf->SetTextColor(217, 119, 6);
-        $pdf->Cell(49, 7, 'Rs. '.number_format($totalDues, 2), 1, 1, 'C');
+        $pdf->Cell(49, 7, 'PKR '.number_format($totalDues, 2), 1, 1, 'C');
 
         $pdf->Ln(4);
 
@@ -536,11 +559,11 @@ class PdfReportService
         $pdf->SetFont('Arial', 'B', 7.5);
         $pdf->SetFillColor(248, 250, 252);
         $pdf->SetTextColor(71, 85, 105);
-        $pdf->Cell(38, 6, 'Consultations: Rs. '.number_format($consultationSales, 0), 1, 0, 'C', true);
-        $pdf->Cell(38, 6, 'Pharmacy: Rs. '.number_format($pharmacySales, 0), 1, 0, 'C', true);
-        $pdf->Cell(38, 6, 'Procedures: Rs. '.number_format($procedureSales, 0), 1, 0, 'C', true);
-        $pdf->Cell(38, 6, 'Lab: Rs. '.number_format($labSales, 0), 1, 0, 'C', true);
-        $pdf->Cell(38, 6, 'Other: Rs. '.number_format($otherSales, 0), 1, 1, 'C', true);
+        $pdf->Cell(38, 6, 'Consultations: PKR '.number_format($consultationSales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Pharmacy: PKR '.number_format($pharmacySales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Procedures: PKR '.number_format($procedureSales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Lab: PKR '.number_format($labSales, 0), 1, 0, 'C', true);
+        $pdf->Cell(38, 6, 'Other: PKR '.number_format($otherSales, 0), 1, 1, 'C', true);
 
         $pdf->Ln(4);
 
@@ -553,7 +576,7 @@ class PdfReportService
         $pdf->Cell(38, 7, 'Category', 1, 0, 'L', true);
         $pdf->Cell(45, 7, 'Patient Name', 1, 0, 'L', true);
         $pdf->Cell(30, 7, 'Method', 1, 0, 'C', true);
-        $pdf->Cell(24, 7, 'Net (Rs.)', 1, 1, 'R', true);
+        $pdf->Cell(24, 7, 'Net (PKR)', 1, 1, 'R', true);
 
         // Table Body
         $pdf->SetFont('Arial', '', 7.5);
@@ -598,7 +621,7 @@ class PdfReportService
         $pdf->SetTextColor(15, 23, 42);
         $pdf->Cell(166, 8, 'TOTAL ACCUMULATED GROSS SALES:', 1, 0, 'R', true);
         $pdf->SetTextColor(37, 99, 235);
-        $pdf->Cell(24, 8, 'Rs. '.number_format($totalSales, 0), 1, 1, 'R', true);
+        $pdf->Cell(24, 8, 'PKR '.number_format($totalSales, 0), 1, 1, 'R', true);
 
         return response($pdf->Output('S'))
             ->header('Content-Type', 'application/pdf')

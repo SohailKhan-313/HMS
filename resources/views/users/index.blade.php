@@ -112,31 +112,7 @@
     </div>
   </div>
 
-  <!-- Notification Alerts -->
-  @if (session('success'))
-    <div class="alert alert-success d-flex align-items-center gap-2 rounded-12 p-3 shadow-sm border-0 mb-4 bg-success bg-opacity-10 text-success">
-      <i class="bi bi-check-circle-fill fs-5"></i>
-      <div class="fw-semibold">{{ session('success') }}</div>
-    </div>
-  @endif
 
-  @if (session('error'))
-    <div class="alert alert-danger d-flex align-items-center gap-2 rounded-12 p-3 shadow-sm border-0 mb-4 bg-danger bg-opacity-10 text-danger">
-      <i class="bi bi-exclamation-octagon-fill fs-5"></i>
-      <div class="fw-semibold">{{ session('error') }}</div>
-    </div>
-  @endif
-
-  @if ($errors->any())
-    <div class="alert alert-danger rounded-12 p-3 shadow-sm border-0 mb-4 bg-danger bg-opacity-10 text-danger">
-      <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Form Submission Errors:</div>
-      <ul class="mb-0 ps-3">
-        @foreach ($errors->all() as $err)
-          <li>{{ $err }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
 
   <!-- Main Users Card & Filter Table -->
   <div class="card border-0 shadow-sm radius-12 bg-white">

@@ -260,22 +260,6 @@
 
 <main class="page-content">
     <div class="container-fluid px-0">
-        @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
-                    <div>
-                        <strong class="d-block mb-1">Please fix the following issues:</strong>
-                        <ul class="mb-0 ps-3">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
 
         <div class="card appointment-card">
             <!-- Header: Create Staff -->
@@ -307,7 +291,7 @@
                         </span>
                     </div>
                     <a href="{{ route('reports.staff.pdf') }}" target="_blank" class="btn btn-outline-danger btn-sm shadow-sm d-flex align-items-center gap-1">
-                        <i class="bi bi-file-earmark-pdf"></i> Print / Export (PDF)
+                        <i class="bi bi-printer me-1"></i> Print Staff
                     </a>
                     <!-- New Staff Button -->
                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#staffModal">
@@ -394,83 +378,7 @@
                     </div>
                 </div>
             </div>
-<!-- Reusable Centered Toast -->
-<!-- Toast Container -->
-<div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
 
-    @php
-        $toastMessage = '';
-        $toastIcon = '';
-        $textColor = '';
-    @endphp
-
-    @if(session('success') || session('update') || session('delete'))
-
-        @php
-            if(session('success')) {
-                $toastMessage = session('success');
-                $toastIcon = 'bi-check-circle-fill text-success';
-                $textColor = 'text-success';
-            } elseif(session('update')) {
-                $toastMessage = session('update');
-                $toastIcon = 'bi-pencil-square text-primary';
-                $textColor = 'text-primary';
-            } elseif(session('delete')) {
-                $toastMessage = session('delete');
-                $toastIcon = 'bi-trash-fill text-danger';
-                $textColor = 'text-danger';
-            }
-        @endphp
-
-        <div id="actionToast" class="toast border-0 shadow-lg bg-white" role="alert">
-
-            <div class="toast-body">
-
-                <div class="d-flex align-items-center">
-
-                    <div class="fs-3">
-                        <i class="bi {{ $toastIcon }}"></i>
-                    </div>
-
-                    <div class="ms-3">
-                        <div class="{{ $textColor }}">
-                            {{ $toastMessage }}
-                        </div>
-                    </div>
-
-                    <button type="button"
-                        class="btn-close ms-auto"
-                        data-bs-dismiss="toast">
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    @endif
-
-</div>
-
-@if(session('success') || session('update') || session('delete'))
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const toastEl = document.getElementById('actionToast');
-
-    if(toastEl){
-        const toast = new bootstrap.Toast(toastEl,{
-            delay:2000,
-            autohide:true
-        });
-
-        toast.show();
-    }
-
-});
-</script>
-@endif
   <!-- Staff table -->
             <div class="card-body p-0">
                 <div class="table-responsive">
